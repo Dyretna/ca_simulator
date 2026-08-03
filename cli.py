@@ -18,9 +18,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from pygame_automata.config import Config
-from pygame_automata.core.ca_runner import CA1DRunner
 from pygame_automata.core.rules import get_ruleset
 from pygame_automata.core.utils import text_to_rule
+from pygame_automata.ui.cli_runner import CLIRunner
 
 load_dotenv()
 
@@ -156,7 +156,7 @@ def main():
     print("Rule:", ruleset_code)
 
     # --- runner ---
-    runner = CA1DRunner(
+    runner = CLIRunner(
         config=config,
         rulesetType=rulesetType,
         ruleset_code=ruleset_code,

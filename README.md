@@ -38,6 +38,16 @@ pip install -e .
 This uses the pyproject.toml configuration and installs the package
 located under src/pygame_automata.
 
+### 3. Set path in .env
+This project uses python-dotenv to get easy access to paths, for example
+when saving visualisations. To make use of it, create a .env file and add
+path to project root folder:
+
+```
+PROJECT_ROOT=/home/User/Dokument/<path to project...>/pygame_automata
+```
+
+
 ## Usage
 
 This launches the basic 1D cellular automaton with default configuration.
