@@ -42,8 +42,10 @@ def parse_args():
     parser.add_argument(
         "--ruleset-size",
         type=int,
-        default=64,
-        help="Number of rules in the ruleset (default: 64).",
+        default=8,
+        help="Bitsize of the ruleset. "
+        + "Available bitsizes: 8, 16, 32, 64. "
+        + "(default: 8).",
     )
 
     parser.add_argument(
@@ -63,6 +65,12 @@ def parse_args():
 
     parser.add_argument(
         "--cell-size", type=int, default=5, help="Pixel size of each cell."
+    )
+
+    parser.add_argument(
+        "--show-rulebox",
+        action="store_true",
+        help="Toggle showing rulebox at topleft",
     )
 
     # --- timing ---
@@ -89,8 +97,7 @@ def parse_args():
     # --- saving ---
     parser.add_argument(
         "--save-folder",
-        type=str,
-        default="examples",
+        action="store_true",
         help="Folder to save screenshots.",
     )
 
@@ -116,7 +123,7 @@ def main():
         timestep_ms=args.timestep_ms,
         bg_color=parse_color(args.bg_color),
         fill_color=parse_color(args.fill_color),
-        show_rulebox=True,
+        show_rulebox=args.show_rulebox,
         save_folder=args.save_folder,
     )
 
@@ -128,7 +135,7 @@ def main():
     elif args.rule is not None:
         ruleset_code = args.rule
     else:
-        ruleset_code = 1  # default
+        ruleset_code = 30  # default
 
     print("Rule:", ruleset_code)
 

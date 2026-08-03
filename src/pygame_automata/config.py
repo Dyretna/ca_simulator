@@ -12,5 +12,5 @@ class Config:
     timestep_ms: int = 5
     bg_color: tuple[int, int, int] = (0, 0, 0)
     fill_color: tuple[int, int, int] = (20, 50, 100)
-    show_rulebox: bool = True
+    show_rulebox: bool = False
     save_folder: Path = Path.joinpath(Path.cwd(), "examples")
