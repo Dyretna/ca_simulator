@@ -1,3 +1,4 @@
+![Generated sample](examples/rule_30.png)
 
 # Elementary Cellular Automaton visualizer using pygame.
 

@@ -12,11 +12,19 @@ Allows running the CA visualizer with configurable parameters:
 """
 
 import argparse
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 from pygame_automata.config import Config
+from pygame_automata.core.ca_runner import CA1DRunner
 from pygame_automata.core.rules import get_ruleset
 from pygame_automata.core.utils import text_to_rule
-from pygame_automata.main import CA1dDrawer
+
+load_dotenv()
+
+PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT"))
 
 
 def parse_args():
@@ -97,8 +105,11 @@ def parse_args():
     # --- saving ---
     parser.add_argument(
         "--save-folder",
-        action="store_true",
-        help="Folder to save screenshots.",
+        type=str,
+        default=None,
+        help="Relative folder to project root.  "
+        + "Default from config is root / 'examples'"
+        + "For saving CA visualisations (press 'S' while running)",
     )
 
     return parser.parse_args()
@@ -113,6 +124,11 @@ def parse_color(s: str):
 def main():
     args = parse_args()
 
+    #  resolve save_folder path
+    if args.save_folder is not None:
+        save_folder = PROJECT_ROOT / args.save_folder
+    else:
+        save_folder = PROJECT_ROOT / "examples"
     # --- config ---
     config = Config(
         width=args.width,
@@ -124,7 +140,7 @@ def main():
         bg_color=parse_color(args.bg_color),
         fill_color=parse_color(args.fill_color),
         show_rulebox=args.show_rulebox,
-        save_folder=args.save_folder,
+        save_folder=save_folder,
     )
 
     # --- ruleset ---
@@ -140,7 +156,7 @@ def main():
     print("Rule:", ruleset_code)
 
     # --- runner ---
-    runner = CA1dDrawer(
+    runner = CA1DRunner(
         config=config,
         rulesetType=rulesetType,
         ruleset_code=ruleset_code,

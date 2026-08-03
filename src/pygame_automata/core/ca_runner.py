@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pygame
 
-from .config import Config
-from .core.rules import RulesetBase
+from ..config import Config
+from .rules import RulesetBase
 
 
-class CA1dDrawer:
+class CA1DRunner:
     def __init__(
         self,
         config: Config,
@@ -185,8 +185,8 @@ class CA1dDrawer:
 # MAIN ENTRY
 # ---------------------------------------------------------
 if __name__ == "__main__":
-    from .core.rules import get_ruleset
-    from .core.utils import text_to_rule
+    from .rules import get_ruleset
+    from .utils import text_to_rule
 
     config = Config(
         width=1920,
@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
     # ---------------------------------
 
-    runner = CA1dDrawer(
+    runner = CA1DRunner(
         config=config,
         rulesetType=rulesetType,
         ruleset_code=1,  # or test word_to_rule above
