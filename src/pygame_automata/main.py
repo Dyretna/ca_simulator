@@ -145,7 +145,7 @@ class CA1dDrawer:
 
             color = self.fill_color if cell == 1 else self.bg_color
             # debug
-            print("i, cell, color in draw generation: ", i, cell, color)
+            # print("i, cell, color in draw generation: ", i, cell, color)
 
             pygame.draw.rect(screen, color, (x, y, self.cell_size, self.cell_size))
 
@@ -202,10 +202,10 @@ if __name__ == "__main__":
     )
 
     # --------------------------------
-    # testing translating words to CA
+    # testing translating words to CA rules
     # --------------------------------
 
-    text_str = "Jesper"
+    text_str = "I <3 CA"
     ruleset_size = 64
 
     rulesetType = get_ruleset(ruleset_size)
