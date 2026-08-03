@@ -48,38 +48,11 @@ python -m pygame_automata.cli
 ```
 
 The CLI allows overriding configuration parameters such as rule, text-to-rule,
-window size, fullscreen, colors, and timing.
+window size, fullscreen, colors, and timing. run with help flag to see current options.
 
-#### Run with a specific rule
 ```bash
-python -m pygame_automata.cli --rule 90
+python -m pygame_automata.cli --help
 ```
-
-#### Generate rule from text
-```bash
-python -m pygame_automata.cli --text "I <3 CA"
-```
-
-#### Change window size
-```bash
-python -m pygame_automata.cli --width 1280 --height 720
-```
-
-#### Fullscreen mode
-```bash
-python -m pygame_automata.cli --fullscreen
-```
-
-#### Custom colors
-```bash
-python -m pygame_automata.cli --bg-color 0,0,0 --fill-color 255,255,255
-```
-
-#### Use in-order rule stepping
-```bash
-python -m pygame_automata.cli --in-order
-```
-
 
 
 ## Planned Features
