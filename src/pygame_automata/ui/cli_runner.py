@@ -1,4 +1,3 @@
-import time
 from pathlib import Path
 
 import pygame
@@ -37,55 +36,41 @@ class CLIRunner:
             in_order=in_order,
         )
 
-        self.screen = None
-        self.save_flag = False
-
-    # ---------------------------------------------------------
-    # RUN
-    # ---------------------------------------------------------
-    def run(self):
+        # pygame
         pygame.init()
-
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Cellular Automata Test")
-        clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
+        self.save_flag = False
+        self.running = False
 
         if self.fullscreen:
             pygame.display.flip()
             pygame.display.toggle_fullscreen()
 
+    # ---------------------------------------------------------
+    # RUN
+    # ---------------------------------------------------------
+    def run(self):
         print(f"Current Rule: {self.engine.ruleset_code}")
-
         self.screen.fill(self.bg_color)
+        self.running = True
 
-        running = True
-
-        while running:
-            # events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
-                    if event.key == pygame.K_s:
-                        self.save_flag = True
-
-            # next generation
-            cells = self.engine.step()
+        while self.running:
+            self.handle_events()
 
             # draw
+            cells = self.engine.step()
             self.draw_generation(self.screen, cells)
-
             if self.show_rulebox:
                 self.draw_rulebox(self.screen, self.engine.ruleset_code)
 
             # reset when full
             if self.engine.needs_reset(self.height):
-                time.sleep(self.pause_sec)
+                pygame.time.wait(int(self.pause_sec * 1000))
 
                 if self.save_flag:
-                    self.save_flag = self.save(self.screen)
+                    self.save(self.screen)
 
                 new_rule = self.engine.reset()
                 print(f"Current Rule: {new_rule}")
@@ -103,9 +88,27 @@ class CLIRunner:
                     )
                 )
 
-            clock.tick(1000 // self.timestep_ms)
+            self.clock.tick(1000 // self.timestep_ms)
 
         pygame.quit()
+
+    # ---------------------------------------------------------
+    # Events
+    # ---------------------------------------------------------
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                if event.key == pygame.K_s:
+                    self.save_flag = True
+                if event.key == pygame.K_d:
+                    self.show_rulebox = not self.show_rulebox
+                if event.key == pygame.K_f:
+                    pygame.display.flip()
+                    pygame.display.toggle_fullscreen()
 
     # ---------------------------------------------------------
     # RENDER
@@ -145,9 +148,9 @@ class CLIRunner:
     # ---------------------------------------------------------
     # SAVE
     # ---------------------------------------------------------
-    def save(self, screen) -> bool:
+    def save(self, screen) -> None:
         Path(self.save_folder).mkdir(parents=True, exist_ok=True)
         filename = Path(self.save_folder) / f"rule_{self.engine.ruleset_code}.png"
         pygame.image.save(screen, filename)
         print(f"Saved {self.engine.ruleset_code}")
-        return False
+        self.save_flag = False
