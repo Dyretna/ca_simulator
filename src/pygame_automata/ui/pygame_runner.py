@@ -161,36 +161,50 @@ class PygameRunner:
         text_c = (230, 230, 230)
 
         # --- icon buttons ---
-        pos = (10, 10, 50, 40)
-        self.ui_bar.add_button(btn.StopButton(*pos, bg, hover, icon, self.stop))
-        pos = (70, 10, 50, 40)
-        self.ui_bar.add_button(
-            btn.PauseButton(*pos, bg, hover, icon, self.toggle_pause)
-        )
-        pos = (130, 10, 50, 40)
-        self.ui_bar.add_button(btn.PlayButton(*pos, bg, hover, icon, self.play))
+        # stop
+        start = 10
+        pos = (start, 10, 50, 40)
+        func = self.stop
+        self.ui_bar.add_button(btn.StopButton(*pos, bg, hover, icon, func))
+
+        # pause
+        start += 60
+        pos = (start, 10, 50, 40)
+        func = self.toggle_pause
+        self.ui_bar.add_button(btn.PauseButton(*pos, bg, hover, icon, func))
+
+        # play
+        start += 60
+        pos = (start, 10, 50, 40)
+        func = self.play
+        self.ui_bar.add_button(btn.PlayButton(*pos, bg, hover, icon, func))
 
         # --- text buttons ---
+        # inline helper
+        def make_text_button_pos(start: int, text: str) -> tuple[tuple, int]:
+            width = len(text) * 13
+            return (start, 10, width, 40), width
+
         # save btn
-        start, text_str = 230, "Save (s)"
-        width = len(text_str) * 13
-        pos, func = (start, 10, width, 40), self.set_save_flag
+        start = 230
+        text_str, func = "Save (s)", self.set_save_flag
+        pos, width = make_text_button_pos(start, text_str)
         self.ui_bar.add_button(
             btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
 
         # fullscreen
-        start, text_str = (start + width + 10), "fullscreen (f)"
-        width = len(text_str) * 13
-        pos, func = (start, 10, width, 40), self.toggle_fullscreen
+        start = start + width + 10
+        text_str, func = "fullscreen (f)", self.toggle_fullscreen
+        pos, width = make_text_button_pos(start, text_str)
         self.ui_bar.add_button(
             btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
 
         # rulebox
-        start, text_str = (start + width + 10), "rulebox (d)"
-        width = len(text_str) * 13
-        pos, func = (start, 10, width, 40), self.toggle_rulebox
+        start = start + width + 10
+        text_str, func = "rulebox (d)", self.toggle_rulebox
+        pos, width = make_text_button_pos(start, text_str)
         self.ui_bar.add_button(
             btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
