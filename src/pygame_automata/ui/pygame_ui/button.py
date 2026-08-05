@@ -160,6 +160,12 @@ class PauseButton(IconButtonBase):
         )
 
 
+# ----------------------------------------------
+# CURRENTLY NOT IN USE
+# maybe in later extension
+# ----------------------------------------------
+
+
 class NextButton(IconButtonBase):
     """Next icon: double right-pointing triangles."""
 

@@ -41,9 +41,6 @@ Pause:
     Freezes the runner only after a simulation has finished. Normal stepping
     continues during active CA execution.
 
-Next Step:
-    Flags a single-step request (future extension).
-
 Save:
     Sets a flag that causes the current CA image to be saved at the next
     safe point (either immediately after completion or during pause).
@@ -112,7 +109,6 @@ class PygameRunner:
 
         self.running = True
         self.hard_pause = False
-        self.next_step = False
         self.save_flag = False
 
     def run(self):
@@ -169,9 +165,6 @@ class PygameRunner:
             btn.PauseButton(260, 10, 50, 40, bg, hover, icon, self.pause)
         )
         self.ui_bar.add_button(
-            btn.NextButton(320, 10, 50, 40, bg, hover, icon, self.request_single_step)
-        )
-        self.ui_bar.add_button(
             btn.TextButton(
                 380, 10, 80, 40, "Save", self.font, bg, text, self.set_save_flag
             )
@@ -208,9 +201,6 @@ class PygameRunner:
 
     def pause(self):
         self.hard_pause = True
-
-    def request_single_step(self):
-        self.next_step = True
 
     def toggle_fullscreen(self):
         pygame.display.toggle_fullscreen()
