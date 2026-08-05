@@ -97,15 +97,17 @@ class PygameRunner:
 
         self.font = pygame.font.SysFont("consolas", 20)
         self.ui_height = 60
-        self.ui_bar = UIBar(height=self.ui_height)  # transperent, but holds buttons
+        self.ui_bar = UIBar(height=self.ui_height)  # transparent, but holds buttons
         self.ca_surface = pygame.Surface((width, height))
         self.controller = Controller(self, self.ui_bar)
 
         self._init_ui_buttons()
 
-        self.running = True
-        self.hard_pause = False
-        self.save_flag = False
+        # flags for events and callbacks
+        self.running: bool = True
+        self.hard_pause: bool = False
+        self.save_flag: bool = False
+        self.show_rulebox: bool = False
 
     def run(self):
         self.ca_surface.fill(self.bg_color)
@@ -139,6 +141,8 @@ class PygameRunner:
 
             self.screen.blit(self.ca_surface, (0, 0))
             self.ui_bar.draw(self.screen)
+            if self.show_rulebox:
+                self._draw_rulebox()
 
             pygame.display.flip()
             self.clock.tick(60)
@@ -154,39 +158,46 @@ class PygameRunner:
         bg = (30, 40, 50)
         hover = (60, 60, 90)
         icon = (100, 130, 50)
-        text = (230, 230, 230)
+        text_c = (230, 230, 230)
 
-        # icon buttons
+        # --- icon buttons ---
+        pos = (10, 10, 50, 40)
+        self.ui_bar.add_button(btn.StopButton(*pos, bg, hover, icon, self.stop))
+        pos = (70, 10, 50, 40)
         self.ui_bar.add_button(
-            btn.PlayButton(10, 10, 50, 40, bg, hover, icon, self.play)
+            btn.PauseButton(*pos, bg, hover, icon, self.toggle_pause)
         )
+        pos = (130, 10, 50, 40)
+        self.ui_bar.add_button(btn.PlayButton(*pos, bg, hover, icon, self.play))
+
+        # --- text buttons ---
+        # save btn
+        start, text_str = 230, "Save (s)"
+        width = len(text_str) * 13
+        pos, func = (start, 10, width, 40), self.set_save_flag
         self.ui_bar.add_button(
-            btn.PauseButton(70, 10, 50, 40, bg, hover, icon, self.toggle_pause)
+            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
-        # text buttons
+
+        # fullscreen
+        start, text_str = (start + width + 10), "fullscreen (f)"
+        width = len(text_str) * 13
+        pos, func = (start, 10, width, 40), self.toggle_fullscreen
         self.ui_bar.add_button(
-            btn.TextButton(
-                130, 10, 100, 40, "Save (s)", self.font, bg, text, self.set_save_flag
-            )
+            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
+
+        # rulebox
+        start, text_str = (start + width + 10), "rulebox (d)"
+        width = len(text_str) * 13
+        pos, func = (start, 10, width, 40), self.toggle_rulebox
         self.ui_bar.add_button(
-            btn.TextButton(
-                240,
-                10,
-                170,
-                40,
-                "fullscreen (f)",
-                self.font,
-                bg,
-                text,
-                self.toggle_fullscreen,
-            )
+            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
         )
 
     # --------------------------------------------
     # RENDER
     # --------------------------------------------
-
     def _draw_generation(self, cells):
         y = self.engine.generation * self.cell_size
         for i, cell in enumerate(cells):
@@ -201,24 +212,29 @@ class PygameRunner:
         self.ca_surface.fill(self.bg_color)
         print(f"Current Rule: {new_rule}")
 
+    def _draw_rulebox(self):
+        font = pygame.font.SysFont("consolas", 20)
+
+        bit_str = f"{self.engine.ruleset_code:0{self.engine.ruleset.bit_len}b}"
+        grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
+
+        text_str = f"Rule: {self.engine.ruleset_code} ({grouped})"
+        text = font.render(text_str, True, (255, 255, 255))
+
+        text_w, text_h = font.size(text_str)
+        padding = 10
+        box_w = text_w + padding * 2
+        box_h = text_h + padding
+
+        box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
+        box.fill((0, 0, 0, 120))
+
+        self.screen.blit(box, (0, 0))
+        self.screen.blit(text, (padding, padding // 2))
+
     # --------------------------------------------
-    # CALLBACKS
+    # SAVE
     # --------------------------------------------
-
-    def stop(self):
-        self.running = False
-
-    def play(self):
-        self._reset_simulation()
-
-    def toggle_pause(self):
-        self.hard_pause = not self.hard_pause
-
-    def toggle_fullscreen(self):
-        pygame.display.toggle_fullscreen()
-
-    def set_save_flag(self):
-        self.save_flag = True
 
     def save(self):
         bit = self.engine.ruleset.bit_len
@@ -230,3 +246,24 @@ class PygameRunner:
         pygame.image.save(self.ca_surface, filename)
         print(f"Saved {filename}")
         self.save_flag = False
+
+    # --------------------------------------------
+    # CALLBACKS
+    # --------------------------------------------
+    def play(self):
+        self._reset_simulation()
+
+    def set_save_flag(self):
+        self.save_flag = True
+
+    def stop(self):
+        self.running = False
+
+    def toggle_fullscreen(self):
+        pygame.display.toggle_fullscreen()
+
+    def toggle_pause(self):
+        self.hard_pause = not self.hard_pause
+
+    def toggle_rulebox(self):
+        self.show_rulebox = not self.show_rulebox

@@ -127,19 +127,6 @@ class IconButtonBase(ButtonBase, ABC):
         pass
 
 
-class PlayButton(IconButtonBase):
-    """Play icon: right-pointing triangle."""
-
-    def draw_icon(self, surface: pygame.Surface, cx: int, cy: int):
-        size = self.rect.h // 3
-        points = [
-            (cx - size // 2, cy - size),
-            (cx - size // 2, cy + size),
-            (cx + size, cy),
-        ]
-        pygame.draw.polygon(surface, self.icon_color, points)
-
-
 class PauseButton(IconButtonBase):
     """Pause icon: two vertical bars."""
 
@@ -157,6 +144,35 @@ class PauseButton(IconButtonBase):
             surface,
             self.icon_color,
             (cx + gap - bar_w, cy - bar_h // 2, bar_w, bar_h),
+        )
+
+
+class PlayButton(IconButtonBase):
+    """Play icon: right-pointing triangle."""
+
+    def draw_icon(self, surface: pygame.Surface, cx: int, cy: int):
+        size = self.rect.h // 3
+        points = [
+            (cx - size // 2, cy - size),
+            (cx - size // 2, cy + size),
+            (cx + size, cy),
+        ]
+        pygame.draw.polygon(surface, self.icon_color, points)
+
+
+class StopButton(IconButtonBase):
+    """Stop icon: Square."""
+
+    def draw_icon(self, surface: pygame.Surface, cx: int, cy: int):
+        pygame.draw.rect(
+            surface,
+            self.icon_color,
+            (
+                cx - self.rect.w // 4,
+                cy - self.rect.h // 4,
+                self.rect.w // 2,
+                self.rect.h // 2,
+            ),
         )
 
 

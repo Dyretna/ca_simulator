@@ -63,5 +63,5 @@ class Controller:
             self.runner.save()
         elif key == pygame.K_f:
             self.runner.toggle_fullscreen()
-        elif key == pygame.K_n:
-            self.runner.request_single_step()
+        elif key == pygame.K_d:
+            self.runner.toggle_rulebox()
