@@ -82,6 +82,7 @@ class PygameRunner:
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("CA GUI Runner")
         self.clock = pygame.time.Clock()
+        pygame.display.toggle_fullscreen()
 
         self.engine = CAEngine(
             rulesetType=rulesetType,
@@ -96,12 +97,7 @@ class PygameRunner:
 
         self.font = pygame.font.SysFont("consolas", 20)
         self.ui_height = 60
-        self.ui_bar = UIBar(
-            height=self.ui_height,
-            bg_color=(20, 20, 30),
-            text_color=(200, 200, 220),
-            font=self.font,
-        )
+        self.ui_bar = UIBar(height=self.ui_height)  # transperent, but holds buttons
         self.ca_surface = pygame.Surface((width, height))
         self.controller = Controller(self, self.ui_bar)
 
@@ -121,8 +117,8 @@ class PygameRunner:
             cells = self.engine.step()
             self._draw_generation(cells)
 
-            # reset when  full
-            if self.engine.needs_reset(self.height - self.ui_height):
+            # reset when full
+            if self.engine.needs_reset(self.height):
                 pygame.time.wait(self.post_pause_ms)
                 if self.save_flag:
                     self.save()
@@ -130,7 +126,7 @@ class PygameRunner:
                 # pause button - after simulation
                 if self.hard_pause:
                     self.screen.blit(self.ca_surface, (0, 0))
-                    self.ui_bar.draw(self.screen, self.engine.ruleset_code)
+                    self.ui_bar.draw(self.screen)
                     pygame.display.flip()
                     self.clock.tick(60)
 
@@ -142,7 +138,7 @@ class PygameRunner:
                 self._reset_simulation()
 
             self.screen.blit(self.ca_surface, (0, 0))
-            self.ui_bar.draw(self.screen, self.engine.ruleset_code)
+            self.ui_bar.draw(self.screen)
 
             pygame.display.flip()
             self.clock.tick(60)
@@ -153,20 +149,37 @@ class PygameRunner:
     # INIT HELPERS
     # --------------------------------------------
     def _init_ui_buttons(self):
+        """buttons are placed relative to UIBar"""
+
         bg = (30, 40, 50)
         hover = (60, 60, 90)
         icon = (100, 130, 50)
         text = (230, 230, 230)
 
+        # icon buttons
         self.ui_bar.add_button(
-            btn.PlayButton(200, 10, 50, 40, bg, hover, icon, self.play)
+            btn.PlayButton(10, 10, 50, 40, bg, hover, icon, self.play)
         )
         self.ui_bar.add_button(
-            btn.PauseButton(260, 10, 50, 40, bg, hover, icon, self.pause)
+            btn.PauseButton(70, 10, 50, 40, bg, hover, icon, self.toggle_pause)
+        )
+        # text buttons
+        self.ui_bar.add_button(
+            btn.TextButton(
+                130, 10, 100, 40, "Save (s)", self.font, bg, text, self.set_save_flag
+            )
         )
         self.ui_bar.add_button(
             btn.TextButton(
-                380, 10, 80, 40, "Save", self.font, bg, text, self.set_save_flag
+                240,
+                10,
+                170,
+                40,
+                "fullscreen (f)",
+                self.font,
+                bg,
+                text,
+                self.toggle_fullscreen,
             )
         )
 
@@ -196,11 +209,10 @@ class PygameRunner:
         self.running = False
 
     def play(self):
-        self.hard_pause = False
         self._reset_simulation()
 
-    def pause(self):
-        self.hard_pause = True
+    def toggle_pause(self):
+        self.hard_pause = not self.hard_pause
 
     def toggle_fullscreen(self):
         pygame.display.toggle_fullscreen()
