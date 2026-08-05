@@ -30,16 +30,19 @@ class CAEngine:
 
     def step(self):
         """Generate next generation of cells."""
+
         self.cells = self.ruleset.next_generation(self.cells, self.rules)
         self.generation += 1
         return self.cells
 
     def needs_reset(self, height: int) -> bool:
         """Check if we reached bottom of screen."""
+
         return (self.generation * self.cell_size) >= height
 
     def reset(self):
         """Reset simulation and pick next rule."""
+
         if self.in_order:
             self.ruleset_code = (self.ruleset_code + 1) & self.max_rule
         else:
