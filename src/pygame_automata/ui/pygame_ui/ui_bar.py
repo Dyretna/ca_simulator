@@ -2,7 +2,7 @@
 
 import pygame
 
-from .button import ButtonBase
+from .button.base import ButtonBase
 
 
 class UIBar:

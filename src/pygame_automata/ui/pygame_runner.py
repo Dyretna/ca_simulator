@@ -68,16 +68,20 @@ class PygameRunner:
         height: int = 720,
         cell_size: int = 4,
         in_order: bool = False,
-        save_folder: str = "examples",
         post_pause_ms: int = 1000,
+        assets_folder: str = "assets",
+        save_folder: str = "examples",
     ):
         pygame.init()
 
         self.width = width
         self.height = height
         self.cell_size = cell_size
-        self.save_folder = Path(save_folder)
         self.post_pause_ms = post_pause_ms
+
+        # folder paths
+        self.assets_folder = Path(assets_folder)
+        self.save_folder = Path(save_folder)
 
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("CA GUI Runner")
@@ -155,59 +159,45 @@ class PygameRunner:
     def _init_ui_buttons(self):
         """buttons are placed relative to UIBar"""
 
-        bg = (30, 40, 50)
+        # bg = self.bg_color
         hover = (60, 60, 90)
-        icon = (100, 130, 50)
-        text_c = (230, 230, 230)
+        # text_c = (230, 230, 230)
 
         # --- icon buttons ---
         # stop
         start = 10
         pos = (start, 10, 50, 40)
+        icon_path = self.assets_folder / "icon_stop.png"
         func = self.stop
-        self.ui_bar.add_button(btn.StopButton(*pos, bg, hover, icon, func))
+        self.ui_bar.add_button(btn.IconButton(*pos, hover, icon_path, func))
 
         # pause
         start += 60
         pos = (start, 10, 50, 40)
+        icon_path = self.assets_folder / "icon_pause.png"
         func = self.toggle_pause
-        self.ui_bar.add_button(btn.PauseButton(*pos, bg, hover, icon, func))
+        self.ui_bar.add_button(btn.IconButton(*pos, hover, icon_path, func))
 
         # play
         start += 60
         pos = (start, 10, 50, 40)
+        icon_path = self.assets_folder / "icon_play.png"
         func = self.play
-        self.ui_bar.add_button(btn.PlayButton(*pos, bg, hover, icon, func))
+        self.ui_bar.add_button(btn.IconButton(*pos, hover, icon_path, func))
 
-        # --- text buttons ---
-        # inline helper
-        def make_text_button_pos(start: int, text: str) -> tuple[tuple, int]:
-            width = len(text) * 13
-            return (start, 10, width, 40), width
-
-        # save btn
-        start = 230
-        text_str, func = "Save (s)", self.set_save_flag
-        pos, width = make_text_button_pos(start, text_str)
-        self.ui_bar.add_button(
-            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
-        )
+        # save
+        start += 120  # add small gap
+        pos = (start, 10, 50, 40)
+        icon_path = self.assets_folder / "icon_save.png"
+        func = self.set_save_flag
+        self.ui_bar.add_button(btn.IconButton(*pos, hover, icon_path, func))
 
         # fullscreen
-        start = start + width + 10
-        text_str, func = "fullscreen (f)", self.toggle_fullscreen
-        pos, width = make_text_button_pos(start, text_str)
-        self.ui_bar.add_button(
-            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
-        )
-
-        # rulebox
-        start = start + width + 10
-        text_str, func = "rulebox (d)", self.toggle_rulebox
-        pos, width = make_text_button_pos(start, text_str)
-        self.ui_bar.add_button(
-            btn.TextButton(*pos, text_str, self.font, bg, text_c, func)
-        )
+        start += 60
+        pos = (start, 10, 50, 40)
+        icon_path = self.assets_folder / "icon_fullscreen.png"
+        func = self.toggle_fullscreen
+        self.ui_bar.add_button(btn.IconButton(*pos, hover, icon_path, func))
 
     # --------------------------------------------
     # RENDER
