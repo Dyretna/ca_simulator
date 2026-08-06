@@ -53,7 +53,7 @@ from pathlib import Path
 import pygame
 
 from ..core.ca_engine import CAEngine
-from ..core.rules import RulesetBase
+from ..core.rules import RulesetBase, get_ruleset
 from .pygame_ui import button as btn
 from .pygame_ui.controller import Controller
 from .pygame_ui.ui_bar import UIBar
@@ -62,8 +62,8 @@ from .pygame_ui.ui_bar import UIBar
 class PygameRunner:
     def __init__(
         self,
-        rulesetType: RulesetBase,
-        ruleset_code: int,
+        bit_size: int = 8,
+        ruleset_code: int = 30,
         width: int = 1280,
         height: int = 720,
         cell_size: int = 4,
@@ -74,38 +74,22 @@ class PygameRunner:
     ):
         pygame.init()
 
+        self.bit_size = bit_size
+        self.ruleset_code = ruleset_code
         self.width = width
         self.height = height
         self.cell_size = cell_size
+        self.in_order = in_order
         self.post_pause_ms = post_pause_ms
 
-        # folder paths
-        self.assets_folder = Path(assets_folder)
-        self.save_folder = Path(save_folder)
+        self.rulesetType: RulesetBase = get_ruleset(self.bit_size)
 
-        self.screen = pygame.display.set_mode((width, height))
-        pygame.display.set_caption("CA GUI Runner")
-        self.clock = pygame.time.Clock()
-        pygame.display.toggle_fullscreen()
-
-        self.engine = CAEngine(
-            rulesetType=rulesetType,
-            ruleset_code=ruleset_code,
-            width=width,
-            cell_size=cell_size,
-            in_order=in_order,
-        )
-
-        self.bg_color = (10, 20, 30)
-        self.fill_color = (100, 130, 50)
-
-        self.font = pygame.font.SysFont("consolas", 20)
+        # build components
+        self.engine = self.build_engine()
         self.ui_height = 60
         self.ui_bar = UIBar(height=self.ui_height)  # transparent, but holds buttons
         self.ca_surface = pygame.Surface((width, height))
         self.controller = Controller(self, self.ui_bar)
-
-        self._init_ui_buttons()
 
         # flags for events and callbacks
         self.running: bool = True
@@ -113,6 +97,26 @@ class PygameRunner:
         self.save_flag: bool = False
         self.show_rulebox: bool = False
 
+        # folder paths
+        self.assets_folder = Path(assets_folder)
+        self.save_folder = Path(save_folder)
+
+        # setup pygame and style
+        self.bg_color = (10, 20, 30)
+        self.fill_color = (100, 130, 50)
+
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("CA GUI Runner")
+        self.clock = pygame.time.Clock()
+        pygame.display.toggle_fullscreen()
+        self.font = pygame.font.SysFont("consolas", 20)
+
+        # initialize UI (after pygame.display)
+        self._build_ui_buttons()
+
+    # --------------------------------------------
+    # RUN
+    # --------------------------------------------
     def run(self):
         self.ca_surface.fill(self.bg_color)
 
@@ -151,19 +155,30 @@ class PygameRunner:
             pygame.display.flip()
             self.clock.tick(60)
 
+        print("Exiting...")
         pygame.quit()
 
     # --------------------------------------------
     # INIT HELPERS
     # --------------------------------------------
-    def _init_ui_buttons(self):
+
+    def build_engine(self):
+        return CAEngine(
+            rulesetType=self.rulesetType,
+            ruleset_code=self.ruleset_code,
+            width=self.width,
+            cell_size=self.cell_size,
+            in_order=self.in_order,
+        )
+
+    def _build_ui_buttons(self):
         """buttons are placed relative to UIBar"""
 
         # bg = self.bg_color
         hover = (60, 60, 90)
         # text_c = (230, 230, 230)
 
-        # --- icon buttons ---
+        # (( icon buttons ))
         # stop
         start = 10
         pos = (start, 10, 50, 40)
@@ -219,7 +234,7 @@ class PygameRunner:
     def _draw_rulebox(self):
         font = pygame.font.SysFont("consolas", 20)
 
-        bit_str = f"{self.engine.ruleset_code:0{self.engine.ruleset.bit_len}b}"
+        bit_str = f"{self.engine.ruleset_code:0{self.bit_size}b}"
         grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
 
         text_str = f"Rule: {self.engine.ruleset_code} ({grouped})"
@@ -241,11 +256,10 @@ class PygameRunner:
     # --------------------------------------------
 
     def save(self):
-        bit = self.engine.ruleset.bit_len
         rule_code = self.engine.ruleset_code
 
         self.save_folder.mkdir(parents=True, exist_ok=True)
-        filename = self.save_folder / f"{bit}bit_rule_{rule_code}.png"
+        filename = self.save_folder / f"{self.bit_size}bit_rule_{rule_code}.png"
 
         pygame.image.save(self.ca_surface, filename)
         print(f"Saved {filename}")

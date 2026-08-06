@@ -19,7 +19,7 @@ class CAEngine:
         self.width = width
         self.cell_size = cell_size
 
-        self.max_rule = (1 << self.ruleset.bit_len) - 1
+        self.max_rule = (1 << self.ruleset.bit_size) - 1
 
         # runtime state
         self.generation = 0

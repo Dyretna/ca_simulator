@@ -63,13 +63,13 @@ class RulesetBase(ABC):
 
     @property
     @abstractmethod
-    def bit_len(self) -> int:
+    def bit_size(self) -> int:
         """Number of bits in the ruleset (8, 16, 32, ...)"""
         ...
 
     def decode_ruleset(self, code: int) -> List[int]:
         """Decode integer rule into reversed Wolfram bit order."""
-        bits = list(f"{code:0{self.bit_len}b}")
+        bits = list(f"{code:0{self.bit_size}b}")
         bits.reverse()
         return [int(b) for b in bits]
 
@@ -103,7 +103,7 @@ class RulesetBase(ABC):
 
 class Ruleset8bit(RulesetBase):
     @property
-    def bit_len(self) -> int:
+    def bit_size(self) -> int:
         return 8
 
     def apply_rule(self, left: int, middle: int, right: int, ruleset: List[int]) -> int:
@@ -135,7 +135,7 @@ class Ruleset8bit(RulesetBase):
 
 class Ruleset16bit(RulesetBase):
     @property
-    def bit_len(self) -> int:
+    def bit_size(self) -> int:
         return 16
 
     def apply_rule(self, a: int, b: int, c: int, d: int, ruleset: List[int]) -> int:
@@ -169,7 +169,7 @@ class Ruleset16bit(RulesetBase):
 
 class Ruleset32bit(RulesetBase):
     @property
-    def bit_len(self) -> int:
+    def bit_size(self) -> int:
         return 32
 
     def apply_rule(
@@ -207,7 +207,7 @@ class Ruleset32bit(RulesetBase):
 
 class Ruleset64bit(RulesetBase):
     @property
-    def bit_len(self) -> int:
+    def bit_size(self) -> int:
         return 64
 
     def apply_rule(
