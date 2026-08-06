@@ -81,18 +81,10 @@ class PygameRunner:
         self.cell_size = cell_size
         self.in_order = in_order
         self.post_pause_ms = post_pause_ms
-
-        self.rulesetType: RulesetBase = get_ruleset(self.bit_size)
-
-        # build components
-        self.engine = self.build_engine()
         self.ui_height = 60
-        self.ui_bar = UIBar(height=self.ui_height)  # transparent, but holds buttons
-        self.ca_surface = pygame.Surface((width, height))
-        self.controller = Controller(self, self.ui_bar)
 
         # flags for events and callbacks
-        self.running: bool = True
+        self.running: bool = False
         self.hard_pause: bool = False
         self.save_flag: bool = False
         self.show_rulebox: bool = False
@@ -105,19 +97,20 @@ class PygameRunner:
         self.bg_color = (10, 20, 30)
         self.fill_color = (100, 130, 50)
 
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        # ----------------------------------------
+        # updating settings:
+        # creates engine, initializes pygame, builds UIBar
+        # ---------------------------------------
+        self.update_settings()
         pygame.display.set_caption("CA GUI Runner")
         self.clock = pygame.time.Clock()
         pygame.display.toggle_fullscreen()
-        self.font = pygame.font.SysFont("consolas", 20)
-
-        # initialize UI (after pygame.display)
-        self._build_ui_buttons()
 
     # --------------------------------------------
     # RUN
     # --------------------------------------------
     def run(self):
+        self.running = True
         self.ca_surface.fill(self.bg_color)
 
         while self.running:
@@ -159,10 +152,15 @@ class PygameRunner:
         pygame.quit()
 
     # --------------------------------------------
-    # INIT HELPERS
+    # INITIALIZATION AND UPDATING SETTINGS
     # --------------------------------------------
+    def update_settings(self):
+        self.rulesetType: RulesetBase = get_ruleset(self.bit_size)
+        self.engine = self._build_engine()
+        self._initialize_pygame()
+        self._build_ui_buttons()
 
-    def build_engine(self):
+    def _build_engine(self):
         return CAEngine(
             rulesetType=self.rulesetType,
             ruleset_code=self.ruleset_code,
@@ -170,6 +168,13 @@ class PygameRunner:
             cell_size=self.cell_size,
             in_order=self.in_order,
         )
+
+    def _initialize_pygame(self):
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.ca_surface = pygame.Surface((self.width, self.height))
+        self.font = pygame.font.SysFont("consolas", 20)
+        self.ui_bar = UIBar(height=self.ui_height)
+        self.controller = Controller(self, self.ui_bar)
 
     def _build_ui_buttons(self):
         """buttons are placed relative to UIBar"""
