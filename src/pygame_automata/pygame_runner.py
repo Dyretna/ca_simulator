@@ -71,7 +71,7 @@ class PygameRunner:
         # flags / state
         self.show_rulebox = False
         self.save_flag = False
-        self.hard_pause = False
+        self.auto_run = False
         self.in_order = config.in_order
 
         # core engine
@@ -134,21 +134,19 @@ class PygameRunner:
                 # reset when full
                 if self.engine.needs_reset(self.height):
                     pygame.time.wait(self.post_pause_ms)
-                    if self.save_flag:
-                        self._save()
 
-                    # PAUSE: freeze final frame
-                    if self.hard_pause:
+                    # if not autorun, Pause on final frame
+                    if not self.auto_run:
                         self.screen.blit(self.ca_surface, (0, 0))
                         self.ui_bar.draw(self.screen)
 
                         pygame.display.flip()
                         self.clock.tick(60)
 
-                        if self.save_flag:
-                            self._save()
                         continue
 
+                    if self.save_flag:
+                        self._save()
                     # NO PAUSE: start next simulation
                     self._reset_simulation()
 
@@ -183,9 +181,9 @@ class PygameRunner:
         "Save when CA simulation is done"
         self.save_flag = True
 
-    def toggle_pause(self) -> None:
+    def toggle_autorun(self) -> None:
         """Toggle simulation pause."""
-        self.hard_pause = not self.hard_pause
+        self.auto_run = not self.auto_run
 
     def toggle_fullscreen(self) -> None:
         """Toggle fullscreen mode."""

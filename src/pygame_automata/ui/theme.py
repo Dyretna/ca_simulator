@@ -8,9 +8,12 @@ Default theme constants.
 CA_BG_COLOR = (10, 20, 30)
 CA_FILL_COLOR = (100, 130, 50)
 
-# UI bar
+# UI bar and buttons
 UI_BAR_BG = (20, 30, 40)
 UI_BAR_ALPHA = 210
+BTN_HOVER_C = (60, 60, 90)
+BTN_ACTIVE_C = (120, 120, 90)
+
 
 # Settings screen
 SETTINGS_BG = (20, 30, 40)
@@ -22,7 +25,6 @@ SETTINGS_HIGHLIGHT = (120, 160, 220)
 SETTINGS_BUTTON_BG = (40, 50, 60)
 SETTINGS_BUTTON_FG = (230, 230, 230)
 SETTINGS_BUTTON_HOVER = (80, 110, 150)
-
 
 # Spacing tokens
 PADDING = 10

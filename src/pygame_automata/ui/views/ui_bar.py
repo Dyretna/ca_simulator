@@ -90,37 +90,56 @@ class UIBar:
     # Button construction
     # ------------------------------------------------------------------
     def _build_buttons(self):
-        hover = (60, 60, 90)
         start = 10
 
-        def add(icon: str, start: int, func):
+        def add(icon: str, start: int, func, active=None):
             pos = (start, 10, 50, 40)
             icon_path = self.runner.assets_dir / icon
-            self.buttons.append(IconButton(*pos, hover, icon_path, func))
+            self.buttons.append(IconButton(*pos, icon_path, func, active))
 
-        # settings
-        add("icon_settings.png", start, self.runner.open_settings)
+        # settings - bool
+        add(
+            "icon_settings.png",
+            start,
+            self.runner.open_settings,
+            active=lambda: self.runner.settings_screen.is_active(),
+        )
 
-        # fullscreen
+        # fullscreen - bool
         start += 60
-        add("icon_fullscreen.png", start, self.runner.toggle_fullscreen)
+        add(
+            "icon_fullscreen.png",
+            start,
+            self.runner.toggle_fullscreen,
+            active=lambda: self.runner.fullscreen,
+        )
+
+        # show rulebox - bool
+        start += 60
+        add(
+            "icon_R.png",
+            start,
+            self.runner.toggle_rulebox,
+            active=lambda: self.runner.show_rulebox,
+        )
+
+        # autorun - bool
+        start += 60
+        add(
+            "icon_autorun.png",
+            start,
+            self.runner.toggle_autorun,
+            active=lambda: self.runner.auto_run,
+        )
 
         # save
-        start += 60
-        add("icon_save.png", start, self.runner.save)
-
-        # show rulebox
-        start += 60
-        add("icon_R.png", start, self.runner.toggle_rulebox)
-
-        # pause
         start += 120
-        add("icon_pause.png", start, self.runner.toggle_pause)
+        add("icon_save.png", start, self.runner.save)
 
         # play
         start += 60
-        add("icon_play.png", start, self.runner.toggle_pause)
+        add("icon_play.png", start, self.runner.play)
 
-        # stop
+        # stop (exit)
         start += 60
         add("icon_stop.png", self.runner.width - 60, self.runner.stop)

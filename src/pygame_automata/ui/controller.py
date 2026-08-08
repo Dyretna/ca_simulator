@@ -76,7 +76,7 @@ class Controller:
         if key == pygame.K_ESCAPE:
             self.runner.stop()
         elif key == pygame.K_SPACE:
-            self.runner.toggle_pause()
+            self.runner.toggle_autorun()
         elif key == pygame.K_s:
             self.runner.save()
         elif key == pygame.K_f:

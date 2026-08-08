@@ -2,14 +2,16 @@
 
 import pygame
 
+from pygame_automata.ui.theme import BTN_ACTIVE_C, BTN_HOVER_C
+
 from .base import ButtonBase
 
 
 class IconButton(ButtonBase):
-    def __init__(self, x, y, w, h, hover_color, icon_path, callback):
+    def __init__(self, x, y, w, h, icon_path, callback, active=None):
         super().__init__(x, y, w, h, callback)
 
-        self.hover_color = hover_color
+        self.active = active  # callable or None
 
         # circle geometry
         self.cx = x + w // 2
@@ -37,8 +39,13 @@ class IconButton(ButtonBase):
     def draw(self, surface, offset_y):
         cy = self.cy + offset_y
 
-        if self.hover:
-            pygame.draw.circle(surface, self.hover_color, (self.cx, cy), self.radius)
+        # listen if button is active
+        is_active = self.active() if self.active else False
+
+        if is_active:
+            pygame.draw.circle(surface, BTN_ACTIVE_C, (self.cx, cy), self.radius)
+        elif self.hover:
+            pygame.draw.circle(surface, BTN_HOVER_C, (self.cx, cy), self.radius)
 
         img = self.icon_img
         x = self.cx - img.get_width() // 2
