@@ -100,7 +100,7 @@ class PygameRunner:
         self.ca_bg_color = CA_BG_COLOR
         self.ca_fill_color = CA_FILL_COLOR
 
-        self.fullscreen = True
+        self.fullscreen = engine_config.fullscreen
         self._initialize_pygame()
 
         # views
@@ -114,8 +114,6 @@ class PygameRunner:
 
         # controller
         self.controller = Controller(self, self.ui_state)
-
-        pygame.display.toggle_fullscreen()
 
     # ------------------------------------------------------------------
     # Main loop
@@ -241,25 +239,17 @@ class PygameRunner:
 
     def _initialize_pygame(self):
         # recreate display
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        flags = pygame.FULLSCREEN if self.fullscreen else 0
+        self.screen = pygame.display.set_mode((self.width, self.height), flags)
 
         # recreate CA surface
         self.ca_surface = pygame.Surface((self.width, self.height))
         self.ca_surface.fill(self.ca_bg_color)
 
-        # rebuild UI bar (depends on width)
-        self.ui_bar = UIBar(self)
-
-        # rebuild controller (depends on ui_state + ui_bar)
-        self.controller = Controller(self, self.ui_state)
-
-        # restore fullscreen if runner is in fullscreen mode
-        if getattr(self, "fullscreen", False):
-            pygame.display.toggle_fullscreen()
-
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
     def _draw_generation(self, cells) -> None:
         """Draw one CA generation row onto the CA surface."""
 
