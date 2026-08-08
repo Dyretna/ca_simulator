@@ -1,9 +1,14 @@
 # src/pygame_automata/ui/pygame_ui/views/ui_bar.py
 
+from typing import TYPE_CHECKING
+
 import pygame
 
-from pygame_automata.ui.button.icon_button import IconButton
+from pygame_automata.ui.button import ButtonBase, IconButton
 from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
+
+if TYPE_CHECKING:
+    from pygame_automata.pygame_runner import PygameRunner
 
 
 class UIBar:
@@ -17,7 +22,7 @@ class UIBar:
     - It calls runner actions (fullscreen, pause, save, settings, etc.)
     """
 
-    def __init__(self, runner):
+    def __init__(self, runner: "PygameRunner"):
         self.runner = runner
 
         # UI bar surface
@@ -29,7 +34,7 @@ class UIBar:
         self.alpha = UI_BAR_ALPHA
 
         # buttons
-        self.buttons = []
+        self.buttons: list[None | ButtonBase,] = []
         self._build_buttons()
 
         # internal state
@@ -103,6 +108,10 @@ class UIBar:
 
         # save
         add("icon_save.png", start, self.runner.save)
+        start += 60
+
+        # show rulebox
+        add("icon_R.png", start, self.runner.toggle_rulebox)
         start += 60
 
         # stop

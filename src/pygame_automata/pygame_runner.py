@@ -123,6 +123,8 @@ class PygameRunner:
         # first draw before fullscreen
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
+        if self.show_rulebox:
+            self._draw_rulebox()
         pygame.display.flip()
 
         while self.running:
@@ -145,6 +147,8 @@ class PygameRunner:
                     if self.hard_pause:
                         self.screen.blit(self.ca_surface, (0, 0))
                         self.ui_bar.draw(self.screen)
+                        if self.show_rulebox:
+                            self._draw_rulebox()
                         pygame.display.flip()
                         self.clock.tick(60)
 
@@ -158,6 +162,8 @@ class PygameRunner:
             # draw ui and settings
             self.screen.blit(self.ca_surface, (0, 0))
             self.ui_bar.draw(self.screen)
+            if self.show_rulebox:
+                self._draw_rulebox()
 
             if self.settings_screen.is_active():
                 self.settings_screen.draw(self.screen)
@@ -230,15 +236,6 @@ class PygameRunner:
         self.ui_bar = UIBar(self)
         self.controller = Controller(self)
 
-    def _initialize_pygame(self):
-        # recreate display
-        flags = pygame.FULLSCREEN if self.fullscreen else 0
-        self.screen = pygame.display.set_mode((self.width, self.height), flags)
-
-        # recreate CA surface
-        self.ca_surface = pygame.Surface((self.width, self.height))
-        self.ca_surface.fill(self.ca_bg_color)
-
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
@@ -260,6 +257,15 @@ class PygameRunner:
                 self.ca_surface, color, (x, y, self.cell_size, self.cell_size)
             )
 
+    def _initialize_pygame(self):
+        # recreate display
+        flags = pygame.FULLSCREEN if self.fullscreen else 0
+        self.screen = pygame.display.set_mode((self.width, self.height), flags)
+
+        # recreate CA surface
+        self.ca_surface = pygame.Surface((self.width, self.height))
+        self.ca_surface.fill(self.ca_bg_color)
+
     def _reset_simulation(self) -> None:
         """
         Reset CA simulation to initial state.
@@ -277,13 +283,24 @@ class PygameRunner:
 
         This is called by CAScreen when `show_rulebox` is True.
         """
-        # Example placeholder; replace with your actual rulebox drawing:
-        font = pygame.font.SysFont("consolas", 18)
-        txt = font.render(f"Ruleset: {self.engine.ruleset}", True, (200, 200, 200))
-        box = pygame.Surface((txt.get_width() + 20, txt.get_height() + 12))
-        box.fill((20, 20, 20))
-        box.blit(txt, (10, 6))
-        self.ca_surface.blit(box, (10, 10))
+        font = pygame.font.SysFont("consolas", 20)
+
+        bit_str = f"{self.ruleset_code:0{self.engine.ruleset.bit_size}b}"
+        grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
+
+        text_str = f"Rule: {self.engine.ruleset_code} ({grouped})"
+        text = font.render(text_str, True, (255, 255, 255))
+
+        text_w, text_h = font.size(text_str)
+        padding = 10
+        box_w = text_w + padding * 2
+        box_h = text_h + padding
+
+        box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
+        box.fill((0, 0, 0, 120))
+
+        self.screen.blit(box, (0, 0))
+        self.screen.blit(text, (padding, padding // 2))
 
     def _save(self) -> None:
         """
