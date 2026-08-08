@@ -26,7 +26,7 @@ import os
 
 import pygame
 
-from pygame_automata.config import EngineConfig
+from pygame_automata.config import Config
 from pygame_automata.core.ca_engine import CAEngine
 from pygame_automata.core.rules import RulesetBase, get_ruleset
 from pygame_automata.ui.controller import Controller
@@ -41,7 +41,7 @@ class PygameRunner:
     Main pygame-based runner for the CAEngine.
     """
 
-    def __init__(self, engine_config: EngineConfig):
+    def __init__(self, config: Config):
         """
         Parameters
         ----------
@@ -53,33 +53,29 @@ class PygameRunner:
         pygame.display.set_caption("Cellular Automata")
 
         # resolve paths
-        self.assets_dir = getattr(engine_config, "assets_dir", "assets")
-        self.output_dir = getattr(engine_config, "output_dir", "examples")
+        self.assets_dir = config.assets_dir
+        self.output_dir = config.output_dir
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.assets_dir, exist_ok=True)
 
         # core dimensions / settings
-        self.width = engine_config.width
-        self.height = engine_config.height
-        self.cell_size = engine_config.cell_size
+        self.width = config.width
+        self.height = config.height
+        self.cell_size = config.cell_size
 
         # timing
         self.clock = pygame.time.Clock()
         self.running = False
-
-        if hasattr(engine_config, "engine_config"):
-            self.post_pause_ms = engine_config.pause_sec
-        else:
-            self.post_pause_ms = 500
+        self.post_pause_ms = config.post_pause_ms
 
         # flags / state
         self.show_rulebox = False
         self.save_flag = False
         self.hard_pause = False
-        self.in_order = engine_config.in_order
+        self.in_order = config.in_order
 
         # core engine
-        self.ruleset: RulesetBase = get_ruleset(engine_config.bit_size)
+        self.ruleset: RulesetBase = get_ruleset(config.bit_size)
         self.ruleset_code: int = 30
 
         self.engine = CAEngine(
@@ -93,7 +89,7 @@ class PygameRunner:
         self.ca_bg_color = CA_BG_COLOR
         self.ca_fill_color = CA_FILL_COLOR
 
-        self.fullscreen = engine_config.fullscreen
+        self.fullscreen = config.fullscreen
         self._initialize_pygame()
 
         # views
@@ -123,8 +119,6 @@ class PygameRunner:
         # first draw before fullscreen
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
-        if self.show_rulebox:
-            self._draw_rulebox()
         pygame.display.flip()
 
         while self.running:
@@ -147,8 +141,7 @@ class PygameRunner:
                     if self.hard_pause:
                         self.screen.blit(self.ca_surface, (0, 0))
                         self.ui_bar.draw(self.screen)
-                        if self.show_rulebox:
-                            self._draw_rulebox()
+
                         pygame.display.flip()
                         self.clock.tick(60)
 
