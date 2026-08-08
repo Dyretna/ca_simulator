@@ -17,7 +17,7 @@ screen is active, the normal simulation loop is suspended visually and
 all input events are routed to the settings UI. Once the user confirms
 changes, the runner rebuilds its CAEngine and Pygame surfaces via
 update_settings(), ensuring that the new configuration takes effect
-cleanly before resuming normal execution.
+before resuming normal execution.
 """
 
 # src/pygame_automata/ui/pygame_ui/pygame_runner.py
@@ -39,9 +39,6 @@ from pygame_automata.ui.views.ui_bar import UIBar
 class PygameRunner:
     """
     Main pygame-based runner for the CAEngine.
-
-    Orchestrates simulation stepping and delegates rendering and input
-    handling to the UI system (UIState + views + Controller).
     """
 
     def __init__(self, engine_config: EngineConfig):
@@ -147,7 +144,7 @@ class PygameRunner:
                     # PAUSE: freeze final frame
                     if self.hard_pause:
                         self.screen.blit(self.ca_surface, (0, 0))
-                        self.ui_bar.draw()
+                        self.ui_bar.draw(self.screen)
                         pygame.display.flip()
                         self.clock.tick(60)
 
@@ -161,6 +158,7 @@ class PygameRunner:
             # draw ui and settings
             self.screen.blit(self.ca_surface, (0, 0))
             self.ui_bar.draw(self.screen)
+
             if self.settings_screen.is_active():
                 self.settings_screen.draw(self.screen)
 
