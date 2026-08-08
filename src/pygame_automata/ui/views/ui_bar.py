@@ -100,28 +100,27 @@ class UIBar:
 
         # settings
         add("icon_settings.png", start, self.runner.open_settings)
-        start += 60
 
         # fullscreen
-        add("icon_fullscreen.png", start, self.runner.toggle_fullscreen)
         start += 60
+        add("icon_fullscreen.png", start, self.runner.toggle_fullscreen)
 
         # save
-        add("icon_save.png", start, self.runner.save)
         start += 60
+        add("icon_save.png", start, self.runner.save)
 
         # show rulebox
-        add("icon_R.png", start, self.runner.toggle_rulebox)
         start += 60
-
-        # stop
-        add("icon_stop.png", start, self.runner.stop)
-        start += 120
+        add("icon_R.png", start, self.runner.toggle_rulebox)
 
         # pause
+        start += 120
         add("icon_pause.png", start, self.runner.toggle_pause)
-        start += 60
 
         # play
-        add("icon_play.png", start, self.runner.toggle_pause)
         start += 60
+        add("icon_play.png", start, self.runner.toggle_pause)
+
+        # stop
+        start += 60
+        add("icon_stop.png", self.runner.width - 60, self.runner.stop)
