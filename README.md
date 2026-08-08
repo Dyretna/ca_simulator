@@ -70,7 +70,7 @@ The settings panel allows changing:
 - rule generation mode (in‑order or random)
 
 
-##  Features
+##  Features (August 2026)
 - Multiple ruleset sizes (8, 16, 32, 64 bit)
 - Pause and resume
 - Save screenshot
@@ -78,16 +78,8 @@ The settings panel allows changing:
 - Settings panel with resolution, cell size, and rule generation mode
 - Random or sequential rule generation
 
-## Planned additions
-- Step forward / backward
-- Color picker and random palettes
-- Word‑to‑rule input
-- Auto‑run toggle
-- Multiple render modes
 
 ## Current Project Structure
-Its currently in development (August 2026)
-
 ```
 .
 ├── assets
