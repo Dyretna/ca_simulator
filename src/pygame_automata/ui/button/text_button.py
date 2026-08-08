@@ -22,13 +22,11 @@ class TextButton(ButtonBase):
         self.text_x = x + (w - self.text_surf.get_width()) // 2
         self.text_y = y + (h - self.text_surf.get_height()) // 2
 
-    def draw(self, surface, offset_y):
-        rect = pygame.Rect(
-            self.rect.x, self.rect.y + offset_y, self.rect.w, self.rect.h
-        )
+    def draw(self, surface):
+        rect = pygame.Rect(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
         color = self.hover_color if self.hover else self.bg
         pygame.draw.rect(surface, color, rect, border_radius=6)
-        surface.blit(self.text_surf, (self.text_x, self.text_y + offset_y))
+        surface.blit(self.text_surf, (self.text_x, self.text_y))
 
     def on_mouse_move(self, local_pos):
         self.hover = self.rect.collidepoint(local_pos)
