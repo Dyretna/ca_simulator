@@ -128,39 +128,18 @@ class PygameRunner:
 
             # SIMULATION always runs unless settings is open
             if not self.settings_screen.is_active():
+                # normal step
                 cells = self.engine.step()
                 self._draw_generation(cells)
 
                 # reset when full
                 if self.engine.needs_reset(self.height):
-                    pygame.time.wait(self.post_pause_ms)
-
-                    # if not autorun, Pause on final frame
-                    if not self.auto_run:
-                        self.screen.blit(self.ca_surface, (0, 0))
-                        self.ui_bar.draw(self.screen)
-
-                        pygame.display.flip()
-                        self.clock.tick(60)
-
+                    if self._handle_post_sim():
+                        # autorun OFF -> freeze on final frame
                         continue
 
-                    if self.save_flag:
-                        self._save()
-                    # NO PAUSE: start next simulation
-                    self._reset_simulation()
-
             # draw ui and settings
-            self.screen.blit(self.ca_surface, (0, 0))
-            self.ui_bar.draw(self.screen)
-            if self.show_rulebox:
-                self._draw_rulebox()
-
-            if self.settings_screen.is_active():
-                self.settings_screen.draw(self.screen)
-
-            pygame.display.flip()
-
+            self._draw_ui_frame()
             self.clock.tick(60)
 
         print("Exiting...")
@@ -230,6 +209,39 @@ class PygameRunner:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _draw_ui_frame(self):
+        self.screen.blit(self.ca_surface, (0, 0))
+        self.ui_bar.draw(self.screen)
+        if self.show_rulebox:
+            self._draw_rulebox()
+        if self.settings_screen.is_active():
+            self.settings_screen.draw(self.screen)
+        pygame.display.flip()
+
+    def _handle_post_sim(self):
+        end = pygame.time.get_ticks() + self.post_pause_ms
+
+        # autorun OFF -> freeze on final frame only
+        if not self.auto_run:
+            while pygame.time.get_ticks() < end:
+                for event in pygame.event.get():
+                    self.controller.handle(event)
+                self._draw_ui_frame()
+                self.clock.tick(60)
+            return
+
+        # autorun ON -> pause, then save, then reset
+        while pygame.time.get_ticks() < end:
+            for event in pygame.event.get():
+                self.controller.handle(event)
+            self._draw_ui_frame()
+            self.clock.tick(60)
+
+        if self.save_flag:
+            self._save()
+
+        self._reset_simulation()
 
     def _draw_generation(self, cells) -> None:
         """Draw one CA generation row onto the CA surface."""
