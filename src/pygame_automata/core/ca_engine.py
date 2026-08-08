@@ -6,13 +6,13 @@ from .rules import RulesetBase
 class CAEngine:
     def __init__(
         self,
-        rulesetType: RulesetBase,
+        ruleset: RulesetBase,
         ruleset_code: int,
         width: int,
         cell_size: int,
         in_order: bool,
     ):
-        self.ruleset: RulesetBase = rulesetType()
+        self.ruleset: RulesetBase = ruleset
         self.ruleset_code = ruleset_code
         self.in_order = in_order
 

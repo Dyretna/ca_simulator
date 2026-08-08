@@ -1,3 +1,5 @@
+# src/pygame_automata/config.py
+
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,14 +11,15 @@ PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT"))
 
 
 @dataclass
-class Config:
+class EngineConfig:
     width: int = 1920
     height: int = 1080
     fullscreen: bool = False
+    bit_size: int = 8
     cell_size: int = 5
     pause_sec: int = 2
     timestep_ms: int = 5
-    bg_color: tuple[int, int, int] = (0, 0, 0)
-    fill_color: tuple[int, int, int] = (20, 50, 100)
     show_rulebox: bool = False
-    save_folder: Path = Path.joinpath(PROJECT_ROOT, "examples")
+    output_dir: Path = Path.joinpath(PROJECT_ROOT, "examples")
+    assets_dir: Path = Path.joinpath(PROJECT_ROOT, "assets")
+    in_order: bool = False

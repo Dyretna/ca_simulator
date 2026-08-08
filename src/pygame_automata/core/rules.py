@@ -36,10 +36,10 @@ from typing import List
 
 def get_ruleset(ruleset_size: int | str):
     rulesets = {
-        8: Ruleset8bit,
-        16: Ruleset16bit,
-        32: Ruleset32bit,
-        64: Ruleset64bit,
+        8: Ruleset8bit(),
+        16: Ruleset16bit(),
+        32: Ruleset32bit(),
+        64: Ruleset64bit(),
     }
 
     # normalize input

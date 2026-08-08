@@ -1,0 +1,118 @@
+# src/pygame_automata/ui/pygame_ui/views/ui_bar.py
+
+import pygame
+
+from pygame_automata.ui.button.icon_button import IconButton
+from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
+
+
+class UIBar:
+    """
+    Top-level UI bar view.
+
+    This is a proper View in the UIState stack:
+    - It draws itself
+    - It handles its own mouse events
+    - It owns its buttons
+    - It calls runner actions (fullscreen, pause, save, settings, etc.)
+    """
+
+    def __init__(self, runner):
+        self.runner = runner
+
+        # UI bar surface
+        self.height = 60
+        self.surface = pygame.Surface((runner.width, self.height), pygame.SRCALPHA)
+
+        # style
+        self.bg_color = UI_BAR_BG
+        self.alpha = UI_BAR_ALPHA
+
+        # buttons
+        self.buttons = []
+        self._build_buttons()
+
+        # internal state
+        self.offset_y = 0
+
+    # ------------------------------------------------------------------
+    # Drawing
+    # ------------------------------------------------------------------
+    def draw(self, screen: pygame.Surface):
+        # update offset
+        self.offset_y = screen.get_height() - self.height
+
+        # draw background
+        self.surface.fill((*self.bg_color, self.alpha))
+        screen.blit(self.surface, (0, self.offset_y))
+
+        # draw buttons
+        for btn in self.buttons:
+            btn.draw(screen, self.offset_y)
+
+    # ------------------------------------------------------------------
+    # Event handling
+    # ------------------------------------------------------------------
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEMOTION:
+            self._on_mouse_move(event.pos)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self._on_mouse_down(event.pos)
+
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self._on_mouse_up(event.pos)
+
+    def _to_local(self, screen_pos):
+        return screen_pos[0], screen_pos[1] - self.offset_y
+
+    def _on_mouse_move(self, screen_pos):
+        local = self._to_local(screen_pos)
+        for btn in self.buttons:
+            btn.on_mouse_move(local)
+
+    def _on_mouse_down(self, screen_pos):
+        local = self._to_local(screen_pos)
+        for btn in self.buttons:
+            btn.on_mouse_down(local)
+
+    def _on_mouse_up(self, screen_pos):
+        local = self._to_local(screen_pos)
+        for btn in self.buttons:
+            btn.on_mouse_up(local)
+
+    # ------------------------------------------------------------------
+    # Button construction
+    # ------------------------------------------------------------------
+    def _build_buttons(self):
+        hover = (60, 60, 90)
+        start = 10
+
+        def add(icon: str, start: int, func):
+            pos = (start, 10, 50, 40)
+            icon_path = self.runner.assets_dir / icon
+            self.buttons.append(IconButton(*pos, hover, icon_path, func))
+
+        # settings
+        add("icon_settings.png", start, self.runner.open_settings)
+        start += 60
+
+        # fullscreen
+        add("icon_fullscreen.png", start, self.runner.toggle_fullscreen)
+        start += 60
+
+        # save
+        add("icon_save.png", start, self.runner.save)
+        start += 60
+
+        # stop
+        add("icon_stop.png", start, self.runner.stop)
+        start += 120
+
+        # pause
+        add("icon_pause.png", start, self.runner.toggle_pause)
+        start += 60
+
+        # play
+        add("icon_play.png", start, self.runner.toggle_pause)
+        start += 60

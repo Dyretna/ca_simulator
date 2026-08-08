@@ -1,4 +1,4 @@
-![Generated sample](examples/rule_30.png)
+![Generated sample](examples/8bit_rule30.png)
 
 # Elementary Cellular Automaton visualizer using pygame.
 
@@ -47,31 +47,87 @@ path to project root folder:
 PROJECT_ROOT=/home/User/Dokument/<path to project...>/pygame_automata
 ```
 
-
 ## Usage
-
-This launches the basic 1D cellular automaton with default configuration.
-
-### Run using the CLI interface
+Run the pygame visualizer:
 
 ```bash
-python -m pygame_automata.cli
+python run.py
 ```
 
-The CLI allows overriding configuration parameters such as rule, text-to-rule,
-window size, fullscreen, colors, and timing. run with help flag to see current options.
+or
 
-```bash
-python -m pygame_automata.cli --help
+```
+python -m pygame_automata.ui.pygame_runner
 ```
 
+The runner opens a pygame window and starts the automaton immediately.
+The toolbar at the bottom provides controls for pause, play, fullscreen, save, and settings.
 
-## Planned Features
-- Full pygame UI with buttons
-- Pause / resume
-- Step forward / backward
-- Color picker + random palettes
+The settings panel allows changing:
+- resolution
+- cell size
+- ruleset bit length
+- rule generation mode (in‑order or random)
+
+
+##  Features
+- Multiple ruleset sizes (8, 16, 32, 64 bit)
+- Pause and resume
 - Save screenshot
-- word‑to‑rule input
+- Fullscreen toggle
+- Settings panel with resolution, cell size, and rule generation mode
+- Random or sequential rule generation
+
+## Planned additions
+- Step forward / backward
+- Color picker and random palettes
+- Word‑to‑rule input
 - Auto‑run toggle
 - Multiple render modes
+
+## Current Project Structure
+Its currently in development (August 2026)
+
+```
+.
+├── assets
+│   ├── icon_fullscreen.png
+│   ├── icon_pause.png
+│   ├── icon_play.png
+│   ├── icon_save.png
+│   ├── icon_settings.png
+│   └── icon_stop.png
+├── examples
+│   ├── 64bit_rule4981587084493143526.png
+│   └── 8bit_rule30.png
+├── src
+│   └── pygame_automata
+│       ├── core
+│       │   ├── ca_engine.py
+│       │   ├── __init__.py
+│       │   ├── rules.py
+│       │   └── utils.py
+│       ├── ui
+│       │   ├── button
+│       │   │   ├── base.py
+│       │   │   ├── icon_button.py
+│       │   │   ├── __init__.py
+│       │   │   └── text_button.py
+│       │   ├── controller
+│       │   │   ├── controller.py
+│       │   │   └── ui_state.py
+│       │   ├── views
+│       │   │   ├── ca_screen.py
+│       │   │   ├── __init__.py
+│       │   │   ├── settings_screen.py
+│       │   │   └── ui_bar.py
+│       │   ├── __init__.py
+│       │   └── theme.py
+│       ├── config.py
+│       └── pygame_runner.py
+├── LICENSE
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+└── run.py
+```
