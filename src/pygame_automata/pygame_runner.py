@@ -29,8 +29,7 @@ import pygame
 from pygame_automata.config import EngineConfig
 from pygame_automata.core.ca_engine import CAEngine
 from pygame_automata.core.rules import RulesetBase, get_ruleset
-from pygame_automata.ui.controller.controller import Controller
-from pygame_automata.ui.controller.ui_state import UIState
+from pygame_automata.ui.controller import Controller
 from pygame_automata.ui.theme import CA_BG_COLOR, CA_FILL_COLOR
 from pygame_automata.ui.views.ca_screen import CAScreen
 from pygame_automata.ui.views.settings_screen import SettingsScreen
@@ -94,9 +93,6 @@ class PygameRunner:
             in_order=self.in_order,
         )
 
-        # UI system
-        self.ui_state = UIState()
-
         self.ca_bg_color = CA_BG_COLOR
         self.ca_fill_color = CA_FILL_COLOR
 
@@ -108,12 +104,8 @@ class PygameRunner:
         self.ui_bar = UIBar(self)
         self.settings_screen = SettingsScreen(self)
 
-        # push views in bottom-to-top order
-        self.ui_state.push(self.ca_screen)
-        self.ui_state.push(self.ui_bar)
-
         # controller
-        self.controller = Controller(self, self.ui_state)
+        self.controller = Controller(self)
 
     # ------------------------------------------------------------------
     # Main loop
@@ -132,7 +124,8 @@ class PygameRunner:
         print(f"First Rule: {self.ruleset_code}")
 
         # first draw before fullscreen
-        self.ui_state.draw(self.screen)
+        self.screen.blit(self.ca_surface, (0, 0))
+        self.ui_bar.draw(self.screen)
         pygame.display.flip()
 
         while self.running:
@@ -153,7 +146,8 @@ class PygameRunner:
 
                     # PAUSE: freeze final frame
                     if self.hard_pause:
-                        self.ui_state.draw(self.screen)
+                        self.screen.blit(self.ca_surface, (0, 0))
+                        self.ui_bar.draw()
                         pygame.display.flip()
                         self.clock.tick(60)
 
@@ -165,7 +159,8 @@ class PygameRunner:
                     self._reset_simulation()
 
             # draw ui and settings
-            self.ui_state.draw(self.screen)
+            self.screen.blit(self.ca_surface, (0, 0))
+            self.ui_bar.draw(self.screen)
             if self.settings_screen.is_active():
                 self.settings_screen.draw(self.screen)
 
@@ -235,7 +230,7 @@ class PygameRunner:
 
         self._initialize_pygame()
         self.ui_bar = UIBar(self)
-        self.controller = Controller(self, self.ui_state)
+        self.controller = Controller(self)
 
     def _initialize_pygame(self):
         # recreate display

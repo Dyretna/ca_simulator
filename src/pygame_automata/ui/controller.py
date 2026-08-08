@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from .ui_state import UIState
-
 if TYPE_CHECKING:
     from pygame_automata.pygame_runner import PygameRunner
 
@@ -19,17 +17,14 @@ class Controller:
     mouse input is forwarded to the top-most view in the UIState stack.
     """
 
-    def __init__(self, runner: "PygameRunner", ui_state: UIState):
+    def __init__(self, runner: "PygameRunner"):
         """
         Parameters
         ----------
         runner : PygameRunner
             Reference to the main runner instance.
-        ui_state : UIState
-            UI view stack used for routing input and drawing.
         """
         self.runner = runner
-        self.ui_state = ui_state
 
         self.mouse_pos: tuple[int, int] = (0, 0)
         self.mouse_down: bool = False
@@ -65,25 +60,11 @@ class Controller:
             self._handle_key(event.key)
             return
 
-        # route mouse events to active view
-        active_view = self.ui_state.top()
-        if active_view is None:
-            return
-
         if event.type == pygame.MOUSEMOTION:
-            self.mouse_pos = event.pos
-            if hasattr(active_view, "handle_event"):
-                active_view.handle_event(event)
-            return
+            self.runner.ui_bar.handle_event(event)
 
         if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.mouse_down = True
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.mouse_down = False
-
-            if hasattr(active_view, "handle_event"):
-                active_view.handle_event(event)
+            self.runner.ui_bar.handle_event(event)
 
     def _handle_key(self, key: int) -> None:
         """
