@@ -82,44 +82,40 @@ The settings panel allows changing:
 ## Current Project Structure
 ```
 .
+├── examples
+│   ├── 8bit_rule30.png
+│   ...
+│
 ├── assets
 │   ├── icon_fullscreen.png
-│   ├── icon_pause.png
-│   ├── icon_play.png
-│   ├── icon_save.png
-│   ├── icon_settings.png
-│   └── icon_stop.png
-├── examples
-│   ├── 64bit_rule4981587084493143526.png
-│   └── 8bit_rule30.png
+│   ...
+|
 ├── src
 │   └── pygame_automata
 │       ├── core
-│       │   ├── ca_engine.py
+│       │   ├── utils.py
 │       │   ├── __init__.py
-│       │   ├── rules.py
-│       │   └── utils.py
+│       │   ├── ca_engine.py
+│       │   └── rules.py
 │       ├── ui
-│       │   ├── button
-│       │   │   ├── base.py
-│       │   │   ├── icon_button.py
-│       │   │   ├── __init__.py
-│       │   │   └── text_button.py
-│       │   ├── controller
-│       │   │   ├── controller.py
-│       │   │   └── ui_state.py
 │       │   ├── views
 │       │   │   ├── ca_screen.py
 │       │   │   ├── __init__.py
 │       │   │   ├── settings_screen.py
 │       │   │   └── ui_bar.py
-│       │   ├── __init__.py
-│       │   └── theme.py
-│       ├── config.py
-│       └── pygame_runner.py
+│       │   ├── button
+│       │   │   ├── base.py
+│       │   │   ├── icon_button.py
+│       │   │   ├── __init__.py
+│       │   │   └── text_button.py
+│       │   ├── theme.py
+│       │   ├── controller.py
+│       │   └── __init__.py
+│       ├── pygame_runner.py
+│       └── config.py
 ├── LICENSE
-├── pyproject.toml
 ├── README.md
-├── requirements.txt
-└── run.py
+├── run.py
+├── pyproject.toml
+└── requirements.txt
 ```
