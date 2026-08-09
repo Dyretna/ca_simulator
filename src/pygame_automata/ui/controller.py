@@ -75,11 +75,13 @@ class Controller:
         """
         if key == pygame.K_ESCAPE:
             self.runner.stop()
-        elif key == pygame.K_SPACE:
+        elif key == pygame.K_a:
             self.runner.toggle_autorun()
         elif key == pygame.K_s:
-            self.runner.save()
+            self.runner.toggle_save()
         elif key == pygame.K_f:
             self.runner.toggle_fullscreen()
         elif key == pygame.K_r:
             self.runner.toggle_rulebox()
+        elif key == pygame.K_SPACE:
+            self.runner.play()

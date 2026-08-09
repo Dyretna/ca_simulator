@@ -133,13 +133,17 @@ class UIBar:
         )
 
         # save
-        start += 120
-        add("icon_save.png", start, self.runner.save)
+        start += 60
+        add(
+            "icon_save.png",
+            start,
+            self.runner.toggle_save,
+            active=lambda: self.runner.save_flag,
+        )
 
         # play
         start += 60
         add("icon_play.png", start, self.runner.play)
 
         # stop (exit)
-        start += 60
         add("icon_stop.png", self.runner.width - 60, self.runner.stop)

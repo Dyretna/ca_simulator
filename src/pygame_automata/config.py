@@ -17,8 +17,6 @@ class Config:
     fullscreen: bool = False
     bit_size: int = 8
     cell_size: int = 3
-    post_pause_ms: int = 1000
-    show_rulebox: bool = False
+    post_sim_pause_ms: int = 1000
     output_dir: Path = Path.joinpath(PROJECT_ROOT, "examples")
     assets_dir: Path = Path.joinpath(PROJECT_ROOT, "assets")
-    in_order: bool = False

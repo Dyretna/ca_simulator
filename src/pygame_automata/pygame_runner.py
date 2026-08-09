@@ -66,13 +66,13 @@ class PygameRunner:
         # timing
         self.clock = pygame.time.Clock()
         self.running = False
-        self.post_pause_ms = config.post_pause_ms
+        self.post_sim_pause_ms = config.post_sim_pause_ms
 
         # flags / state
         self.show_rulebox = False
         self.save_flag = False
         self.auto_run = False
-        self.in_order = config.in_order
+        self.in_order = False
 
         # core engine
         self.ruleset: RulesetBase = get_ruleset(config.bit_size)
@@ -156,9 +156,11 @@ class PygameRunner:
         """Stop the main loop."""
         self.running = False
 
-    def save(self) -> None:
+    def toggle_save(self) -> None:
         "Save when CA simulation is done"
-        self.save_flag = True
+        print("in toggle save")
+        self.save_flag = not self.save_flag
+        print(self.save_flag)
 
     def toggle_autorun(self) -> None:
         """Toggle simulation pause."""
@@ -220,7 +222,7 @@ class PygameRunner:
         pygame.display.flip()
 
     def _handle_post_sim(self):
-        end = pygame.time.get_ticks() + self.post_pause_ms
+        end = pygame.time.get_ticks() + self.post_sim_pause_ms
 
         # autorun OFF -> freeze on final frame only
         if not self.auto_run:
@@ -229,6 +231,8 @@ class PygameRunner:
                     self.controller.handle(event)
                 self._draw_ui_frame()
                 self.clock.tick(60)
+                if self.save_flag:
+                    self._save()
             return
 
         # autorun ON -> pause, then save, then reset
@@ -237,9 +241,8 @@ class PygameRunner:
                 self.controller.handle(event)
             self._draw_ui_frame()
             self.clock.tick(60)
-
-        if self.save_flag:
-            self._save()
+            if self.save_flag:
+                self._save()
 
         self._reset_simulation()
 
