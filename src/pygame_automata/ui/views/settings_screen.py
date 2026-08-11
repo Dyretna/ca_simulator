@@ -12,14 +12,14 @@ from pygame_automata.ui.theme import (
 from ..button import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from pygame_automata.config import Config
     from pygame_automata.ui.controller import Controller
 
 
 class SettingsScreen:
-    def __init__(self, runner: "PygameRunner"):
-        self.runner = runner
-        self.controller: "Controller" = self.runner.controller
+    def __init__(self, config: "Config", controller: "Controller"):
+        self.config = config
+        self.controller = controller
         self.active = False
 
         # fonts
@@ -119,7 +119,7 @@ class SettingsScreen:
     # ------------------------------------------------------------
     def _build_panel(self):
         """Compute panel geometry."""
-        w, h = self.runner.screen.get_size()
+        w, h = pygame.display.get_window_size()
         self.panel_w = int(w * 0.6)
         self.panel_h = int(h * 0.6)
         self.panel_x = (w - self.panel_w) // 2
@@ -133,21 +133,12 @@ class SettingsScreen:
     def _build_rows(self):
         """Create ButtonRow objects for each setting."""
 
-        # selectable options
-        self.resolutions = [(1280, 720), (1920, 1080)]
-        self.ruleset_sizes = [8, 16, 32, 64]
-        self.cell_sizes = list(range(1, 11))
-        self.generation_in_order = [True, False]
-
         padding = 80
         row_size = 40
 
         res_row = TextButtonRow(padding, padding, "Resolution")
-        for w, h in self.resolutions:
-            active = (
-                w == self.runner.config.display.width
-                and h == self.runner.config.display.height
-            )
+        for w, h in [(1280, 720), (1920, 1080)]:
+            active = w == self.config.display.width and h == self.config.display.height
             res_row.add(
                 f"{w}x{h}",
                 lambda w=w, h=h: self.controller.set_resolution(w, h),
@@ -155,28 +146,58 @@ class SettingsScreen:
             )
 
         y = row_size
+        fs_row = TextButtonRow(padding, padding + y, "Fullscreen")
+        for fs in [True, False]:
+            active = self.config.display.fullscreen == fs
+            fs_row.add(
+                "ON" if fs else "OFF",
+                lambda fs=fs: self.controller.set_fullscreen(fs),
+                active,
+            )
+
+        y += row_size
         rss_row = TextButtonRow(padding, padding + y, "Ruleset Size")
-        for b in self.ruleset_sizes:
-            active = self.runner.config.engine.bit_size == b
+        for b in [8, 16, 32, 64]:
+            active = self.config.engine.bit_size == b
             rss_row.add(str(b), lambda b=b: self.controller.set_ruleset(b), active)
 
         y += row_size
         cs_row = TextButtonRow(padding, padding + y, "Cell Size")
-        for cs in self.cell_sizes:
-            active = self.runner.config.engine.cell_size == cs
+        for cs in list(range(1, 11)):
+            active = self.config.engine.cell_size == cs
             cs_row.add(str(cs), lambda cs=cs: self.controller.set_cellsize(cs), active)
 
         y += row_size
-        mode_row = TextButtonRow(padding, padding + y, "CA Generation Mode")
-        for mode in self.generation_in_order:
-            active = self.runner.config.engine.in_order == mode
+        mode_row = TextButtonRow(padding, padding + y, "Random Mode")
+        for mode in [True, False]:
+            active = self.config.engine.random_gen == mode
             mode_row.add(
-                "In Order" if mode else "Random",
-                lambda mode=mode: self.controller.set_gen_mode(mode),
+                "ON" if mode else "OFF",
+                lambda mode=mode: self.controller.set_random_mode(mode),
                 active,
             )
 
-        self.rows = [res_row, rss_row, cs_row, mode_row]
+        y += row_size
+        ar_row = TextButtonRow(padding, padding + y, "AutoRun")
+        for ar in [True, False]:
+            active = self.config.general.auto_run == ar
+            ar_row.add(
+                "ON" if ar else "OFF",
+                lambda ar=ar: self.controller.set_autorun(ar),
+                active,
+            )
+
+        y += row_size
+        info_row = TextButtonRow(padding, padding + y, "Info Overlay")
+        for inf in [True, False]:
+            active = self.config.general.show_info == inf
+            info_row.add(
+                "ON" if inf else "OFF",
+                lambda inf=inf: self.controller.set_info(inf),
+                active,
+            )
+
+        self.rows = [res_row, fs_row, rss_row, cs_row, mode_row, ar_row, info_row]
 
     def _build_apply_btn(self):
         btn_y = self.panel_y + self.panel_h - 60
@@ -204,5 +225,5 @@ class SettingsScreen:
         )
 
     def _apply_changes(self):
-        self.runner.update_settings()
+        self.controller.apply_changes()
         self.hide()

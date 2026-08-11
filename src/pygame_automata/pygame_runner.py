@@ -10,7 +10,7 @@ automaton reaches the bottom of the screen, the runner enters a
 post-simulation phase that allows saving, pausing, or restarting the
 simulation without interrupting an active run.
 
-The runner also supports a fullscreen settings overlay (SettingsScreen)
+The runner also supports a settings overlay (SettingsScreen)
 that allows the user to modify core configuration parameters such as
 resolution, bit-size, cell size, and update mode. When the settings
 screen is active, the normal simulation loop is suspended visually and
@@ -69,7 +69,7 @@ class PygameRunner:
             ruleset_code=self.ruleset_code,
             width=self.config.display.width,
             cell_size=self.config.engine.cell_size,
-            in_order=self.config.engine.in_order,
+            random=self.config.engine.random_gen,
         )
 
         self._initialize_pygame()
@@ -80,7 +80,7 @@ class PygameRunner:
         # views
         self.ca_screen = CAScreen(self)
         self.ui_bar = UIBar(self)
-        self.settings_screen = SettingsScreen(self)
+        self.settings_screen = SettingsScreen(self.config, self.controller)
 
     # ------------------------------------------------------------------
     # Main loop
@@ -115,7 +115,7 @@ class PygameRunner:
                 self._draw_generation(cells)
 
                 # reset when full
-                if self.engine.needs_reset(self.config.display.height):
+                if self.engine.simulation_done(self.config.display.height):
                     if self._handle_post_sim():
                         # autorun OFF -> freeze on final frame
                         continue
@@ -163,7 +163,7 @@ class PygameRunner:
             cell_size=self.config.engine.cell_size,
             bit_size=self.config.engine.bit_size,
             ruleset_code=self.ruleset_code,
-            in_order=self.config.engine.in_order,
+            random=self.config.engine.random_gen,
         )
 
         self._initialize_pygame()
@@ -232,10 +232,9 @@ class PygameRunner:
 
     def _initialize_pygame(self):
         # recreate display
+        res = (self.config.display.width, self.config.display.height)
         flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
-        self.screen = pygame.display.set_mode(
-            (self.config.display.width, self.config.display.height), flags
-        )
+        self.screen = pygame.display.set_mode(res, flags)
 
         # recreate CA surface
         self.ca_surface = pygame.Surface(

@@ -100,7 +100,6 @@ class UIBar:
             icon_path = self.runner.config.paths.assets_dir / icon
             self.buttons.append(IconButton(*pos, icon_path, func, active))
 
-        # settings - bool
         add(
             "icon_settings.png",
             start,
@@ -108,7 +107,6 @@ class UIBar:
             active=lambda: self.runner.settings_screen.is_active(),
         )
 
-        # fullscreen - bool
         start += 60
         add(
             "icon_fullscreen.png",
@@ -117,16 +115,22 @@ class UIBar:
             active=lambda: self.runner.config.display.fullscreen,
         )
 
-        # show rulebox - bool
         start += 60
         add(
-            "icon_R.png",
+            "icon_i.png",
             start,
             self.controller.toggle_info,
             active=lambda: self.runner.config.general.show_info,
         )
 
-        # autorun - bool
+        start += 60
+        add(
+            "icon_R.png",
+            start,
+            self.controller.toggle_random_mode,
+            active=lambda: self.runner.config.engine.random_gen,
+        )
+
         start += 60
         add(
             "icon_autorun.png",
@@ -135,7 +139,6 @@ class UIBar:
             active=lambda: self.runner.config.general.auto_run,
         )
 
-        # save
         start += 60
         add(
             "icon_save.png",
@@ -144,9 +147,7 @@ class UIBar:
             active=lambda: self.runner.save_flag,
         )
 
-        # play
         start += 60
         add("icon_play.png", start, self.runner.play)
 
-        # stop (exit)
         add("icon_stop.png", self.runner.config.display.width - 60, self.runner.stop)

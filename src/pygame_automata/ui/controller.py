@@ -76,25 +76,34 @@ class Controller:
         """
         if key == pygame.K_ESCAPE:
             self.runner.stop()
+        elif key == pygame.K_SPACE:
+            self.runner.play()
         elif key == pygame.K_a:
             self.toggle_autorun()
-        elif key == pygame.K_s:
-            self.toggle_save()
         elif key == pygame.K_f:
             self.toggle_fullscreen()
         elif key == pygame.K_i:
             self.toggle_info()
-        elif key == pygame.K_SPACE:
-            self.runner.play()
+        elif key == pygame.K_r:
+            self.toggle_random_mode()
+        elif key == pygame.K_s:
+            self.toggle_save()
 
     # ------------------------------------------------------------
     # Callbacks
     # ------------------------------------------------------------
+    def apply_changes(self):
+        """Called from settings"""
+        self.runner.update_settings()
+        print("Display or Engine Updated")
 
     # --- Setters ---
     def set_resolution(self, w, h):
         self.config.display.width = w
         self.config.display.height = h
+
+    def set_fullscreen(self, fs):
+        self.config.display.fullscreen = fs
 
     def set_ruleset(self, b):
         self.config.engine.bit_size = b
@@ -102,8 +111,14 @@ class Controller:
     def set_cellsize(self, cs):
         self.config.engine.cell_size = cs
 
-    def set_gen_mode(self, m):
-        self.config.engine.in_order = m == "In Order"
+    def set_random_mode(self, m):
+        self.config.engine.random_gen = m
+
+    def set_autorun(self, ar):
+        self.config.general.auto_run = ar
+
+    def set_info(self, inf):
+        self.config.general.show_info = inf
 
     # --- Toggles ---
     def toggle_save(self) -> None:
@@ -111,14 +126,18 @@ class Controller:
         self.save_flag = not self.save_flag
 
     def toggle_autorun(self) -> None:
-        """Toggle simulation pause."""
         self.config.general.auto_run = not self.config.general.auto_run
 
     def toggle_fullscreen(self) -> None:
-        """Toggle fullscreen mode."""
         self.config.display.fullscreen = not self.config.display.fullscreen
-        pygame.display.toggle_fullscreen()
+        res = (self.config.display.width, self.config.display.height)
+        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
+        pygame.display.set_mode(res, flags)
 
     def toggle_info(self) -> None:
-        """Toggle rulebox overlay."""
+        """Toggle information overlay."""
         self.config.general.show_info = not self.config.general.show_info
+
+    def toggle_random_mode(self) -> None:
+        self.config.engine.random_gen = not self.config.engine.random_gen
+        self.apply_changes()

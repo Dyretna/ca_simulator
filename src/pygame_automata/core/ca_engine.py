@@ -10,12 +10,12 @@ class CAEngine:
         ruleset_code: int,
         width: int,
         cell_size: int,
-        in_order: bool,
+        random: bool,
     ):
         self.bit_size: int = bit_size
         self.ruleset: RulesetBase = get_ruleset(bit_size)
         self.ruleset_code = ruleset_code
-        self.in_order = in_order
+        self.random = random
 
         self.width = width
         self.cell_size = cell_size
@@ -36,7 +36,7 @@ class CAEngine:
         self.generation += 1
         return self.cells
 
-    def needs_reset(self, height: int) -> bool:
+    def simulation_done(self, height: int) -> bool:
         """Check if we reached bottom of screen."""
 
         return (self.generation * self.cell_size) >= height
@@ -44,10 +44,10 @@ class CAEngine:
     def reset(self):
         """Reset simulation and pick next rule."""
 
-        if self.in_order:
-            self.ruleset_code = (self.ruleset_code + 1) & self.max_rule
-        else:
+        if self.random:
             self.ruleset_code = random.randint(0, self.max_rule)
+        else:
+            self.ruleset_code = (self.ruleset_code + 1) & self.max_rule
 
         self.rules = self.ruleset.decode_ruleset(self.ruleset_code)
         self.generation = 0

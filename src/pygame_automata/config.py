@@ -22,7 +22,7 @@ class GeneralSettings:
 class EngineSettings:
     bit_size: int = 8
     cell_size: int = 3
-    in_order: bool = True
+    random_gen: bool = True
     post_sim_pause_ms: int = 1000
 
 
