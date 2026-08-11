@@ -30,7 +30,6 @@ from pygame_automata.config import Config
 from pygame_automata.core.ca_engine import CAEngine
 from pygame_automata.ui.controller import Controller
 from pygame_automata.ui.theme import DEFAULT_FONT
-from pygame_automata.ui.views.ca_screen import CAScreen
 from pygame_automata.ui.views.settings_screen import SettingsScreen
 from pygame_automata.ui.views.ui_bar import UIBar
 
@@ -78,7 +77,6 @@ class PygameRunner:
         self.controller = Controller(self)
 
         # views
-        self.ca_screen = CAScreen(self)
         self.ui_bar = UIBar(self)
         self.settings_screen = SettingsScreen(self.config, self.controller)
 
