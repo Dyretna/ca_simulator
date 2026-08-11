@@ -57,9 +57,6 @@ class PygameRunner:
         self.clock = pygame.time.Clock()
         self.running = False
 
-        # flags - not in config
-        self.save_flag = False
-
         # core engine
         self.ruleset_code: int = 30
 
@@ -77,7 +74,7 @@ class PygameRunner:
         self.controller = Controller(self)
 
         # views
-        self.ui_bar = UIBar(self)
+        self.ui_bar = UIBar(self.config, self.controller)
         self.settings_screen = SettingsScreen(self.config, self.controller)
 
     # ------------------------------------------------------------------
@@ -128,26 +125,6 @@ class PygameRunner:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def play(self):
-        """Plays next or resets the simulation"""
-        self._reset_simulation()
-
-    def stop(self) -> None:
-        """Stop the main loop."""
-        self.running = False
-
-    # --- settings ---
-    def open_settings(self) -> None:
-        """Show the settings screen as a modal view."""
-        if self.settings_screen.is_active():
-            return
-        self.settings_screen.show()
-
-    def close_settings(self) -> None:
-        """Hide the settings screen and remove it from the UI stack."""
-        if not self.settings_screen.is_active():
-            return
-        self.settings_screen.hide()
 
     def update_settings(self) -> None:
         """
@@ -191,7 +168,7 @@ class PygameRunner:
                     self.controller.handle(event)
                 self._draw_ui_frame()
                 self.clock.tick(60)
-                if self.save_flag:
+                if self.controller.save_flag:
                     self._save()
             return
 
@@ -201,7 +178,7 @@ class PygameRunner:
                 self.controller.handle(event)
             self._draw_ui_frame()
             self.clock.tick(60)
-            if self.save_flag:
+            if self.controller.save_flag:
                 self._save()
 
         self._reset_simulation()
@@ -273,4 +250,4 @@ class PygameRunner:
         path = os.path.join(self.config.paths.output_dir, filename)
         pygame.image.save(self.ca_surface, path)
         print(f"Saved CA image to {path}")
-        self.save_flag = False
+        self.controller.save_flag = False

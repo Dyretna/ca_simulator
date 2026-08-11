@@ -1,26 +1,24 @@
 # src/pygame_automata/ui/pygame_ui/views/ui_bar.py
 
-from typing import TYPE_CHECKING
 
 import pygame
 
 from pygame_automata.ui.button import ButtonBase, IconButton
 from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
 
-if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+from ...config import Config
+from ..controller import Controller
 
 
 class UIBar:
-    def __init__(self, runner: "PygameRunner"):
-        self.runner = runner
-        self.controller = self.runner.controller
+    def __init__(self, config: "Config", controller: "Controller"):
+        self.config = config
+        self.controller = controller
 
         # UI bar surface
+        self.width = config.display.width
         self.height = 60
-        self.surface = pygame.Surface(
-            (runner.config.display.width, self.height), pygame.SRCALPHA
-        )
+        self.surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
         # style
         self.bg_color = UI_BAR_BG
@@ -87,14 +85,14 @@ class UIBar:
 
         def add(icon: str, start: int, func, active=None):
             pos = (start, 10, 50, 40)
-            icon_path = self.runner.config.paths.assets_dir / icon
+            icon_path = self.config.paths.assets_dir / icon
             self.buttons.append(IconButton(*pos, icon_path, func, active))
 
         add(
             "icon_settings.png",
             start,
-            self.runner.open_settings,
-            active=lambda: self.runner.settings_screen.is_active(),
+            self.controller.open_settings,
+            active=lambda: self.controller.settings_is_active(),
         )
 
         start += 60
@@ -102,7 +100,7 @@ class UIBar:
             "icon_fullscreen.png",
             start,
             self.controller.toggle_fullscreen,
-            active=lambda: self.runner.config.display.fullscreen,
+            active=lambda: self.config.display.fullscreen,
         )
 
         start += 60
@@ -110,7 +108,7 @@ class UIBar:
             "icon_i.png",
             start,
             self.controller.toggle_info,
-            active=lambda: self.runner.config.general.show_info,
+            active=lambda: self.config.general.show_info,
         )
 
         start += 60
@@ -118,7 +116,7 @@ class UIBar:
             "icon_R.png",
             start,
             self.controller.toggle_random_mode,
-            active=lambda: self.runner.config.engine.random_gen,
+            active=lambda: self.config.engine.random_gen,
         )
 
         start += 60
@@ -126,7 +124,7 @@ class UIBar:
             "icon_autorun.png",
             start,
             self.controller.toggle_autorun,
-            active=lambda: self.runner.config.general.auto_run,
+            active=lambda: self.config.general.auto_run,
         )
 
         start += 60
@@ -134,10 +132,11 @@ class UIBar:
             "icon_save.png",
             start,
             self.controller.toggle_save,
-            active=lambda: self.runner.save_flag,
+            active=lambda: self.controller.save_flag,
         )
 
         start += 60
-        add("icon_play.png", start, self.runner.play)
+        add("icon_play.png", start, self.controller.play)
 
-        add("icon_stop.png", self.runner.config.display.width - 60, self.runner.stop)
+        # stop at the right end
+        add("icon_stop.png", self.config.display.width - 60, self.controller.stop)

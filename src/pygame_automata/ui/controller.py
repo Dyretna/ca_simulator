@@ -28,6 +28,8 @@ class Controller:
         self.runner = runner
         self.config = runner.config
 
+        self.save_flag = False
+
         self.mouse_pos: tuple[int, int] = (0, 0)
         self.mouse_down: bool = False
 
@@ -54,7 +56,7 @@ class Controller:
             return
 
         if event.type == pygame.QUIT:
-            self.runner.stop()
+            self.stop()
             return
 
         if event.type == pygame.KEYDOWN:
@@ -69,9 +71,9 @@ class Controller:
 
     def _handle_key(self, key: int) -> None:
         if key == pygame.K_ESCAPE:
-            self.runner.stop()
+            self.stop()
         elif key == pygame.K_SPACE:
-            self.runner.play()
+            self.play()
         elif key == pygame.K_a:
             self.toggle_autorun()
         elif key == pygame.K_f:
@@ -135,3 +137,27 @@ class Controller:
     def toggle_random_mode(self) -> None:
         self.config.engine.random_gen = not self.config.engine.random_gen
         self.apply_changes()
+
+    # --- play and stop ---
+    def play(self):
+        """Plays next or resets the simulation"""
+        self.runner._reset_simulation()
+
+    def stop(self) -> None:
+        """Stop the main loop."""
+        self.runner.running = False
+
+    # --- Open / close settings ---
+    def settings_is_active(self):
+        return self.runner.settings_screen.is_active()
+
+    def open_settings(self) -> None:
+        """Show the settings screen as a modal view."""
+        if self.settings_is_active():
+            self.runner.settings_screen.show()
+
+    def close_settings(self) -> None:
+        """Hide the settings screen"""
+        if not self.settings_is_active():
+            return
+        self.runner.settings_screen.hide()
