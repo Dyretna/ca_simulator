@@ -58,10 +58,8 @@ class PygameRunner:
         self.clock = pygame.time.Clock()
         self.running = False
 
-        # flags / state
-        self.show_rulebox = False
+        # flags - not in config
         self.save_flag = False
-        self.auto_run = False
 
         # core engine
         self.ruleset_code: int = 30
@@ -74,16 +72,15 @@ class PygameRunner:
             in_order=self.config.engine.in_order,
         )
 
-        self.fullscreen = self.config.display.fullscreen
         self._initialize_pygame()
+
+        # controller
+        self.controller = Controller(self)
 
         # views
         self.ca_screen = CAScreen(self)
         self.ui_bar = UIBar(self)
         self.settings_screen = SettingsScreen(self)
-
-        # controller
-        self.controller = Controller(self)
 
     # ------------------------------------------------------------------
     # Main loop
@@ -141,23 +138,6 @@ class PygameRunner:
         """Stop the main loop."""
         self.running = False
 
-    def toggle_save(self) -> None:
-        "Save when CA simulation is done"
-        self.save_flag = not self.save_flag
-
-    def toggle_autorun(self) -> None:
-        """Toggle simulation pause."""
-        self.auto_run = not self.auto_run
-
-    def toggle_fullscreen(self) -> None:
-        """Toggle fullscreen mode."""
-        self.fullscreen = not self.fullscreen
-        pygame.display.toggle_fullscreen()
-
-    def toggle_rulebox(self) -> None:
-        """Toggle rulebox overlay."""
-        self.show_rulebox = not self.show_rulebox
-
     # --- settings ---
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
@@ -197,8 +177,8 @@ class PygameRunner:
     def _draw_ui_frame(self):
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
-        if self.show_rulebox:
-            self._draw_rulebox()
+        if self.config.general.show_info:
+            self._draw_info()
         if self.settings_screen.is_active():
             self.settings_screen.draw(self.screen)
         pygame.display.flip()
@@ -207,7 +187,7 @@ class PygameRunner:
         end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
 
         # autorun OFF -> freeze on final frame only
-        if not self.auto_run:
+        if not self.config.general.auto_run:
             while pygame.time.get_ticks() < end:
                 for event in pygame.event.get():
                     self.controller.handle(event)
@@ -244,7 +224,6 @@ class PygameRunner:
                 if cell == 1
                 else self.config.colors.ca_bg_color
             )
-
             pygame.draw.rect(
                 self.ca_surface,
                 color,
@@ -253,7 +232,7 @@ class PygameRunner:
 
     def _initialize_pygame(self):
         # recreate display
-        flags = pygame.FULLSCREEN if self.fullscreen else 0
+        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
         self.screen = pygame.display.set_mode(
             (self.config.display.width, self.config.display.height), flags
         )
@@ -265,27 +244,20 @@ class PygameRunner:
         self.ca_surface.fill(self.config.colors.ca_bg_color)
 
     def _reset_simulation(self) -> None:
-        """
-        Reset CA simulation to initial state.
+        """Reset CA simulation to initial state."""
 
-        Delegates to CAEngine.reset() and clears the CA surface.
-        """
         new_rule = self.engine.reset()
         self.ruleset_code = new_rule
         self.ca_surface.fill(self.config.colors.ca_bg_color)
         print(f"Current Rule: {new_rule}")
 
-    def _draw_rulebox(self) -> None:
-        """
-        Draw the rulebox overlay on top of the CA surface.
+    def _draw_info(self) -> None:
+        """Draw the info overlay on top of the CA surface."""
 
-        This is called by CAScreen when `show_rulebox` is True.
-        """
         font = pygame.font.SysFont(**DEFAULT_FONT)
 
         bit_str = f"{self.ruleset_code:0{self.engine.ruleset.bit_size}b}"
         grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
-
         text_str = f"Rule: {self.engine.ruleset_code} ({grouped})"
         text = font.render(text_str, True, (255, 255, 255))
 
@@ -296,16 +268,12 @@ class PygameRunner:
 
         box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
         box.fill((0, 0, 0, 120))
-
         self.screen.blit(box, (0, 0))
         self.screen.blit(text, (padding, padding // 2))
 
     def _save(self) -> None:
-        """
-        Save the current CA surface as an image.
+        """Save the current CA surface as an image."""
 
-        Uses a timestamp-based filename in the configured output directory.
-        """
         filename = f"{self.engine.ruleset.bit_size}bit_rule{self.ruleset_code}.png"
         path = os.path.join(self.config.paths.output_dir, filename)
         pygame.image.save(self.ca_surface, path)

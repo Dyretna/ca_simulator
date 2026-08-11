@@ -24,6 +24,7 @@ class UIBar:
 
     def __init__(self, runner: "PygameRunner"):
         self.runner = runner
+        self.controller = self.runner.controller
 
         # UI bar surface
         self.height = 60
@@ -112,8 +113,8 @@ class UIBar:
         add(
             "icon_fullscreen.png",
             start,
-            self.runner.toggle_fullscreen,
-            active=lambda: self.runner.fullscreen,
+            self.controller.toggle_fullscreen,
+            active=lambda: self.runner.config.display.fullscreen,
         )
 
         # show rulebox - bool
@@ -121,8 +122,8 @@ class UIBar:
         add(
             "icon_R.png",
             start,
-            self.runner.toggle_rulebox,
-            active=lambda: self.runner.show_rulebox,
+            self.controller.toggle_info,
+            active=lambda: self.runner.config.general.show_info,
         )
 
         # autorun - bool
@@ -130,8 +131,8 @@ class UIBar:
         add(
             "icon_autorun.png",
             start,
-            self.runner.toggle_autorun,
-            active=lambda: self.runner.auto_run,
+            self.controller.toggle_autorun,
+            active=lambda: self.runner.config.general.auto_run,
         )
 
         # save
@@ -139,7 +140,7 @@ class UIBar:
         add(
             "icon_save.png",
             start,
-            self.runner.toggle_save,
+            self.controller.toggle_save,
             active=lambda: self.runner.save_flag,
         )
 

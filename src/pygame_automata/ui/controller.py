@@ -25,6 +25,7 @@ class Controller:
             Reference to the main runner instance.
         """
         self.runner = runner
+        self.config = runner.config
 
         self.mouse_pos: tuple[int, int] = (0, 0)
         self.mouse_down: bool = False
@@ -76,12 +77,48 @@ class Controller:
         if key == pygame.K_ESCAPE:
             self.runner.stop()
         elif key == pygame.K_a:
-            self.runner.toggle_autorun()
+            self.toggle_autorun()
         elif key == pygame.K_s:
-            self.runner.toggle_save()
+            self.toggle_save()
         elif key == pygame.K_f:
-            self.runner.toggle_fullscreen()
-        elif key == pygame.K_r:
-            self.runner.toggle_rulebox()
+            self.toggle_fullscreen()
+        elif key == pygame.K_i:
+            self.toggle_info()
         elif key == pygame.K_SPACE:
             self.runner.play()
+
+    # ------------------------------------------------------------
+    # Callbacks
+    # ------------------------------------------------------------
+
+    # --- Setters ---
+    def set_resolution(self, w, h):
+        self.config.display.width = w
+        self.config.display.height = h
+
+    def set_ruleset(self, b):
+        self.config.engine.bit_size = b
+
+    def set_cellsize(self, cs):
+        self.config.engine.cell_size = cs
+
+    def set_gen_mode(self, m):
+        self.config.engine.in_order = m == "In Order"
+
+    # --- Toggles ---
+    def toggle_save(self) -> None:
+        "Save when CA simulation is done"
+        self.save_flag = not self.save_flag
+
+    def toggle_autorun(self) -> None:
+        """Toggle simulation pause."""
+        self.config.general.auto_run = not self.config.general.auto_run
+
+    def toggle_fullscreen(self) -> None:
+        """Toggle fullscreen mode."""
+        self.config.display.fullscreen = not self.config.display.fullscreen
+        pygame.display.toggle_fullscreen()
+
+    def toggle_info(self) -> None:
+        """Toggle rulebox overlay."""
+        self.config.general.show_info = not self.config.general.show_info

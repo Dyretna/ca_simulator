@@ -13,6 +13,12 @@ class DisplaySettings:
 
 
 @dataclass
+class GeneralSettings:
+    auto_run: bool = False
+    show_info: bool = False
+
+
+@dataclass
 class EngineSettings:
     bit_size: int = 8
     cell_size: int = 3
@@ -42,6 +48,7 @@ class PathsSettings:
 @dataclass
 class Config:
     display: DisplaySettings = field(default_factory=DisplaySettings)
+    general: GeneralSettings = field(default_factory=GeneralSettings)
     engine: EngineSettings = field(default_factory=EngineSettings)
     colors: ColorSettings = field(default_factory=ColorSettings)
     paths: PathsSettings = field(default_factory=PathsSettings)

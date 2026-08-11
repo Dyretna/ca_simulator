@@ -13,11 +13,13 @@ from ..button import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
     from pygame_automata.pygame_runner import PygameRunner
+    from pygame_automata.ui.controller import Controller
 
 
 class SettingsScreen:
-    def __init__(self, runner):
-        self.runner: "PygameRunner" = runner
+    def __init__(self, runner: "PygameRunner"):
+        self.runner = runner
+        self.controller: "Controller" = self.runner.controller
         self.active = False
 
         # fonts
@@ -146,19 +148,23 @@ class SettingsScreen:
                 w == self.runner.config.display.width
                 and h == self.runner.config.display.height
             )
-            res_row.add(f"{w}x{h}", lambda w=w, h=h: self._set_resolution(w, h), active)
+            res_row.add(
+                f"{w}x{h}",
+                lambda w=w, h=h: self.controller.set_resolution(w, h),
+                active,
+            )
 
         y = row_size
         rss_row = TextButtonRow(padding, padding + y, "Ruleset Size")
         for b in self.ruleset_sizes:
             active = self.runner.config.engine.bit_size == b
-            rss_row.add(str(b), lambda b=b: self._set_ruleset(b), active)
+            rss_row.add(str(b), lambda b=b: self.controller.set_ruleset(b), active)
 
         y += row_size
         cs_row = TextButtonRow(padding, padding + y, "Cell Size")
         for cs in self.cell_sizes:
             active = self.runner.config.engine.cell_size == cs
-            cs_row.add(str(cs), lambda cs=cs: self._set_cellsize(cs), active)
+            cs_row.add(str(cs), lambda cs=cs: self.controller.set_cellsize(cs), active)
 
         y += row_size
         mode_row = TextButtonRow(padding, padding + y, "CA Generation Mode")
@@ -166,7 +172,7 @@ class SettingsScreen:
             active = self.runner.config.engine.in_order == mode
             mode_row.add(
                 "In Order" if mode else "Random",
-                lambda mode=mode: self._set_gen_mode(mode),
+                lambda mode=mode: self.controller.set_gen_mode(mode),
                 active,
             )
 
@@ -196,22 +202,6 @@ class SettingsScreen:
             self.font,
             self.hide,
         )
-
-    # ------------------------------------------------------------
-    # Setting callbacks
-    # ------------------------------------------------------------
-    def _set_resolution(self, w, h):
-        self.runner.config.display.width = w
-        self.runner.config.display.height = h
-
-    def _set_ruleset(self, b):
-        self.runner.config.engine.bit_size = b
-
-    def _set_cellsize(self, cs):
-        self.runner.config.engine.cell_size = cs
-
-    def _set_gen_mode(self, m):
-        self.runner.config.engine.in_order = m == "In Order"
 
     def _apply_changes(self):
         self.runner.update_settings()
