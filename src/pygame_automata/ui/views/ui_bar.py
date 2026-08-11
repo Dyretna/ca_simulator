@@ -12,16 +12,6 @@ if TYPE_CHECKING:
 
 
 class UIBar:
-    """
-    Top-level UI bar view.
-
-    This is a proper View in the UIState stack:
-    - It draws itself
-    - It handles its own mouse events
-    - It owns its buttons
-    - It calls runner actions (fullscreen, pause, save, settings, etc.)
-    """
-
     def __init__(self, runner: "PygameRunner"):
         self.runner = runner
         self.controller = self.runner.controller

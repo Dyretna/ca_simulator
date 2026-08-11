@@ -1,3 +1,5 @@
+# src/pygame_automata/ui/pygame_ui/views/settings_screen.py
+
 from typing import TYPE_CHECKING
 
 import pygame

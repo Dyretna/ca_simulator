@@ -1,4 +1,4 @@
-# src/pygame_automata/ui/pygame_ui/controller/controller.py
+# src/pygame_automata/ui/pygame_ui/controller.py
 
 from typing import TYPE_CHECKING
 
@@ -13,8 +13,9 @@ class Controller:
     Central input controller.
 
     Receives all pygame events and routes them to the active UI view.
-    Keyboard input is interpreted as global runner controls, while
-    mouse input is forwarded to the top-most view in the UIState stack.
+    Keyboard input is interpreted as global runner controls.
+    If the settings the settings view is active, the event is sent to its own
+    handler that does global-to-local position calculations.
     """
 
     def __init__(self, runner: "PygameRunner"):
@@ -35,7 +36,6 @@ class Controller:
         Handle a single pygame event.
 
         Global events (QUIT, keyboard shortcuts) are handled directly.
-        Mouse events are forwarded to the top-most view in the UI stack.
         """
 
         if self.runner.settings_screen.is_active():
@@ -68,12 +68,6 @@ class Controller:
             self.runner.ui_bar.handle_event(event)
 
     def _handle_key(self, key: int) -> None:
-        """
-        Interpret keyboard input and control the runner.
-
-        ESC stops the runner, SPACE toggles pause, S saves the current
-        CA image, F toggles fullscreen, and D toggles the rulebox overlay.
-        """
         if key == pygame.K_ESCAPE:
             self.runner.stop()
         elif key == pygame.K_SPACE:

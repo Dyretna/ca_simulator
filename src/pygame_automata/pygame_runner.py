@@ -235,9 +235,7 @@ class PygameRunner:
         self.screen = pygame.display.set_mode(res, flags)
 
         # recreate CA surface
-        self.ca_surface = pygame.Surface(
-            (self.config.display.width, self.config.display.height)
-        )
+        self.ca_surface = pygame.Surface(res)
         self.ca_surface.fill(self.config.colors.ca_bg_color)
 
     def _reset_simulation(self) -> None:
