@@ -81,12 +81,7 @@ class PygameRunner:
     # Main loop
     # ------------------------------------------------------------------
     def run(self) -> None:
-        """
-        Main execution loop.
-
-        Draws all views via UIState, routes input via Controller, and
-        steps the simulation only when the runner is not in hard pause mode.
-        """
+        """Main execution loop."""
 
         self.running = True
         self.ca_surface.fill(self.config.colors.ca_bg_color)
@@ -142,8 +137,8 @@ class PygameRunner:
         )
 
         self._initialize_pygame()
-        self.ui_bar = UIBar(self)
         self.controller = Controller(self)
+        self.ui_bar = UIBar(self.config, self.controller)
 
     # ------------------------------------------------------------------
     # Private helpers
