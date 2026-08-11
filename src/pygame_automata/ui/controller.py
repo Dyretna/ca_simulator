@@ -153,7 +153,7 @@ class Controller:
 
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
-        if self.settings_is_active():
+        if not self.settings_is_active():
             self.runner.settings_screen.show()
 
     def close_settings(self) -> None:
