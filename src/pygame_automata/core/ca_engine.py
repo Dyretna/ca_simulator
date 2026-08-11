@@ -1,18 +1,19 @@
 import random
 
-from .rules import RulesetBase
+from .rules import RulesetBase, get_ruleset
 
 
 class CAEngine:
     def __init__(
         self,
-        ruleset: RulesetBase,
+        bit_size: int,
         ruleset_code: int,
         width: int,
         cell_size: int,
         in_order: bool,
     ):
-        self.ruleset: RulesetBase = ruleset
+        self.bit_size: int = bit_size
+        self.ruleset: RulesetBase = get_ruleset(bit_size)
         self.ruleset_code = ruleset_code
         self.in_order = in_order
 

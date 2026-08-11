@@ -28,9 +28,8 @@ import pygame
 
 from pygame_automata.config import Config
 from pygame_automata.core.ca_engine import CAEngine
-from pygame_automata.core.rules import RulesetBase, get_ruleset
 from pygame_automata.ui.controller import Controller
-from pygame_automata.ui.theme import CA_BG_COLOR, CA_FILL_COLOR
+from pygame_automata.ui.theme import DEFAULT_FONT
 from pygame_automata.ui.views.ca_screen import CAScreen
 from pygame_automata.ui.views.settings_screen import SettingsScreen
 from pygame_automata.ui.views.ui_bar import UIBar
@@ -41,7 +40,7 @@ class PygameRunner:
     Main pygame-based runner for the CAEngine.
     """
 
-    def __init__(self, config: Config):
+    def __init__(self):
         """
         Parameters
         ----------
@@ -53,43 +52,29 @@ class PygameRunner:
         pygame.display.set_caption("Cellular Automata")
 
         # resolve paths
-        self.assets_dir = config.assets_dir
-        self.output_dir = config.output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
-        os.makedirs(self.assets_dir, exist_ok=True)
-
-        # core dimensions / settings
-        self.width = config.width
-        self.height = config.height
-        self.cell_size = config.cell_size
+        self.config = Config()
 
         # timing
         self.clock = pygame.time.Clock()
         self.running = False
-        self.post_sim_pause_ms = config.post_sim_pause_ms
 
         # flags / state
         self.show_rulebox = False
         self.save_flag = False
         self.auto_run = False
-        self.in_order = False
 
         # core engine
-        self.ruleset: RulesetBase = get_ruleset(config.bit_size)
         self.ruleset_code: int = 30
 
         self.engine = CAEngine(
-            ruleset=self.ruleset,
+            bit_size=self.config.engine.bit_size,
             ruleset_code=self.ruleset_code,
-            width=self.width,
-            cell_size=self.cell_size,
-            in_order=self.in_order,
+            width=self.config.display.width,
+            cell_size=self.config.engine.cell_size,
+            in_order=self.config.engine.in_order,
         )
 
-        self.ca_bg_color = CA_BG_COLOR
-        self.ca_fill_color = CA_FILL_COLOR
-
-        self.fullscreen = config.fullscreen
+        self.fullscreen = self.config.display.fullscreen
         self._initialize_pygame()
 
         # views
@@ -112,8 +97,8 @@ class PygameRunner:
         """
 
         self.running = True
-        self.ca_surface.fill(self.ca_bg_color)
-        print(f"Ruleset Bitsize: {self.ruleset.bit_size}")
+        self.ca_surface.fill(self.config.colors.ca_bg_color)
+        print(f"Ruleset Bitsize: {self.config.engine.bit_size}")
         print(f"First Rule: {self.ruleset_code}")
 
         # first draw before fullscreen
@@ -133,7 +118,7 @@ class PygameRunner:
                 self._draw_generation(cells)
 
                 # reset when full
-                if self.engine.needs_reset(self.height):
+                if self.engine.needs_reset(self.config.display.height):
                     if self._handle_post_sim():
                         # autorun OFF -> freeze on final frame
                         continue
@@ -158,9 +143,7 @@ class PygameRunner:
 
     def toggle_save(self) -> None:
         "Save when CA simulation is done"
-        print("in toggle save")
         self.save_flag = not self.save_flag
-        print(self.save_flag)
 
     def toggle_autorun(self) -> None:
         """Toggle simulation pause."""
@@ -195,13 +178,12 @@ class PygameRunner:
         Called by SettingsScreen._apply_changes().
         """
         # update engine based on runner attributes
-        self.ruleset = get_ruleset(self.bit_size)
         self.engine = CAEngine(
-            width=self.width,
-            cell_size=self.cell_size,
-            ruleset=self.ruleset,
+            width=self.config.display.width,
+            cell_size=self.config.engine.cell_size,
+            bit_size=self.config.engine.bit_size,
             ruleset_code=self.ruleset_code,
-            in_order=self.in_order,
+            in_order=self.config.engine.in_order,
         )
 
         self._initialize_pygame()
@@ -222,7 +204,7 @@ class PygameRunner:
         pygame.display.flip()
 
     def _handle_post_sim(self):
-        end = pygame.time.get_ticks() + self.post_sim_pause_ms
+        end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
 
         # autorun OFF -> freeze on final frame only
         if not self.auto_run:
@@ -249,28 +231,38 @@ class PygameRunner:
     def _draw_generation(self, cells) -> None:
         """Draw one CA generation row onto the CA surface."""
 
-        y = self.engine.generation * self.cell_size
-        width = self.width
+        y = self.engine.generation * self.engine.cell_size
+        width = self.config.display.width
 
         for i, cell in enumerate(cells):
-            x = i * self.cell_size
+            x = i * self.engine.cell_size
             if x >= width:
                 break
 
-            color = self.ca_fill_color if cell == 1 else self.ca_bg_color
+            color = (
+                self.config.colors.ca_fg_color
+                if cell == 1
+                else self.config.colors.ca_bg_color
+            )
 
             pygame.draw.rect(
-                self.ca_surface, color, (x, y, self.cell_size, self.cell_size)
+                self.ca_surface,
+                color,
+                (x, y, self.engine.cell_size, self.engine.cell_size),
             )
 
     def _initialize_pygame(self):
         # recreate display
         flags = pygame.FULLSCREEN if self.fullscreen else 0
-        self.screen = pygame.display.set_mode((self.width, self.height), flags)
+        self.screen = pygame.display.set_mode(
+            (self.config.display.width, self.config.display.height), flags
+        )
 
         # recreate CA surface
-        self.ca_surface = pygame.Surface((self.width, self.height))
-        self.ca_surface.fill(self.ca_bg_color)
+        self.ca_surface = pygame.Surface(
+            (self.config.display.width, self.config.display.height)
+        )
+        self.ca_surface.fill(self.config.colors.ca_bg_color)
 
     def _reset_simulation(self) -> None:
         """
@@ -280,7 +272,7 @@ class PygameRunner:
         """
         new_rule = self.engine.reset()
         self.ruleset_code = new_rule
-        self.ca_surface.fill(self.ca_bg_color)
+        self.ca_surface.fill(self.config.colors.ca_bg_color)
         print(f"Current Rule: {new_rule}")
 
     def _draw_rulebox(self) -> None:
@@ -289,7 +281,7 @@ class PygameRunner:
 
         This is called by CAScreen when `show_rulebox` is True.
         """
-        font = pygame.font.SysFont("consolas", 20)
+        font = pygame.font.SysFont(**DEFAULT_FONT)
 
         bit_str = f"{self.ruleset_code:0{self.engine.ruleset.bit_size}b}"
         grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
@@ -315,7 +307,7 @@ class PygameRunner:
         Uses a timestamp-based filename in the configured output directory.
         """
         filename = f"{self.engine.ruleset.bit_size}bit_rule{self.ruleset_code}.png"
-        path = os.path.join(self.output_dir, filename)
+        path = os.path.join(self.config.paths.output_dir, filename)
         pygame.image.save(self.ca_surface, path)
         print(f"Saved CA image to {path}")
         self.save_flag = False

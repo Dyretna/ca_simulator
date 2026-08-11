@@ -27,7 +27,9 @@ class UIBar:
 
         # UI bar surface
         self.height = 60
-        self.surface = pygame.Surface((runner.width, self.height), pygame.SRCALPHA)
+        self.surface = pygame.Surface(
+            (runner.config.display.width, self.height), pygame.SRCALPHA
+        )
 
         # style
         self.bg_color = UI_BAR_BG
@@ -94,7 +96,7 @@ class UIBar:
 
         def add(icon: str, start: int, func, active=None):
             pos = (start, 10, 50, 40)
-            icon_path = self.runner.assets_dir / icon
+            icon_path = self.runner.config.paths.assets_dir / icon
             self.buttons.append(IconButton(*pos, icon_path, func, active))
 
         # settings - bool
@@ -146,4 +148,4 @@ class UIBar:
         add("icon_play.png", start, self.runner.play)
 
         # stop (exit)
-        add("icon_stop.png", self.runner.width - 60, self.runner.stop)
+        add("icon_stop.png", self.runner.config.display.width - 60, self.runner.stop)
