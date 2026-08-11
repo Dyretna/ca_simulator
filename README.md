@@ -2,21 +2,14 @@
 
 # Elementary Cellular Automaton visualizer using pygame.
 
-This module implements a scrolling 1D cellular automaton where each
-generation is drawn as a horizontal row of pixels. The automaton evolves
-according to a Wolfram-style 3-cell neighbourhood rule (0-255), and the
-simulation resets with a new random ruleset once the screen is filled.
+This project implements a scrolling 1D cellular automaton where each generation is drawn as a horizontal row of pixels. The automaton evolves
+according to a Wolfram-style 3-cell neighbourhood rule (0-255), and the simulation resets with a new random ruleset once the screen is filled.
 
-The code is an updated OOP version of David Colson's original
-example:
-
-    https://github.com/DavidColson/CellularAutomata
-
-The neighbour evaluation uses bit shifts to compute the rule index
-efficiently, replacing the original string-based binary conversion.
-Additional helpers separate initialization, rule decoding, generation
-updates, and rendering to make the logic easier to read and extend.
-
+The project builds on David Colson's original example:
+```
+https://github.com/DavidColson/CellularAutomata
+```
+The engine and application architecture have been rewritten in an modular OOP-style to support multiple rulesets, dynamic configuration, and a full Pygame-based UI.
 ---
 
 ## Installation
@@ -39,9 +32,7 @@ This uses the pyproject.toml configuration and installs the package
 located under src/pygame_automata.
 
 ### 3. Set path in .env
-This project uses python-dotenv to get easy access to paths, for example
-when saving visualisations. To make use of it, create a .env file and add
-path to project root folder:
+This project uses python-dotenv to get easy access to paths.  To make use of it, create a .env file and add path to project root folder:
 
 ```
 PROJECT_ROOT=/home/User/Dokument/<path to project...>/pygame_automata
@@ -54,29 +45,11 @@ Run the pygame visualizer:
 python run.py
 ```
 
-or
+- The runner opens a pygame window and starts the automaton immediately.
 
-```
-python -m pygame_automata.ui.pygame_runner
-```
+- The toolbar at the bottom provides controls for autorun, play, fullscreen, random-mode, info-overlay, save, and settings.
 
-The runner opens a pygame window and starts the automaton immediately.
-The toolbar at the bottom provides controls for pause, play, fullscreen, save, and settings.
-
-The settings panel allows changing:
-- resolution
-- cell size
-- ruleset bit length
-- rule generation mode (in‑order or random)
-
-
-##  Features (August 2026)
-- Multiple ruleset sizes (8, 16, 32, 64 bit)
-- Pause and resume
-- Save screenshot
-- Fullscreen toggle
-- Settings panel with resolution, cell size, and rule generation mode
-- Random or sequential rule generation
+- The settings panel allows further options that requires an updated display and engine.
 
 
 ## Current Project Structure

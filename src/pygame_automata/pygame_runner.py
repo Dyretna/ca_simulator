@@ -20,8 +20,6 @@ update_settings(), ensuring that the new configuration takes effect
 before resuming normal execution.
 """
 
-# src/pygame_automata/ui/pygame_ui/pygame_runner.py
-
 import os
 
 import pygame
