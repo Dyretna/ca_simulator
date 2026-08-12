@@ -273,4 +273,4 @@ class PygameRunner:
         path = os.path.join(self.config.paths.output_dir, filename)
         pygame.image.save(self.ca_surface, path)
         print(f"Saved CA image to {path}")
-        self.controller.save_flag = False
+        self.save_flag = False
