@@ -26,6 +26,7 @@ import pygame
 
 from pygame_automata.config import Config
 from pygame_automata.core.ca_engine import CAEngine
+from pygame_automata.ui.actions import Actions
 from pygame_automata.ui.controller import Controller
 from pygame_automata.ui.theme import DEFAULT_FONT
 from pygame_automata.ui.views.settings_screen import SettingsScreen
@@ -68,12 +69,12 @@ class PygameRunner:
 
         self._initialize_pygame()
 
-        # controller
+        self.actions = Actions(self)
+        self.settings_screen = SettingsScreen(self)
+        self.ui_bar = UIBar(self)
         self.controller = Controller(self)
 
-        # views
-        self.ui_bar = UIBar(self.config, self.controller)
-        self.settings_screen = SettingsScreen(self.config, self.controller)
+        self.save_flag = False
 
     # ------------------------------------------------------------------
     # Main loop
@@ -115,9 +116,15 @@ class PygameRunner:
         print("Exiting...")
         pygame.quit()
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+    def play(self):
+        """Plays next or resets the simulation"""
+        self._reset_simulation()
+
+    def stop(self) -> None:
+        """Stop the main loop."""
+        self.running = False
+
+    # --- Settings ---
 
     def update_settings(self) -> None:
         """
@@ -133,48 +140,33 @@ class PygameRunner:
             ruleset_code=self.ruleset_code,
             random=self.config.engine.random_gen,
         )
-
         self._initialize_pygame()
-        self.controller = Controller(self)
-        self.ui_bar = UIBar(self.config, self.controller)
+        self.ui_bar.rebuild()
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
+    def settings_is_active(self):
+        return self.settings_screen.is_active()
 
-    def _draw_ui_frame(self):
-        self.screen.blit(self.ca_surface, (0, 0))
-        self.ui_bar.draw(self.screen)
-        if self.config.general.show_info:
-            self._draw_info()
-        if self.settings_screen.is_active():
-            self.settings_screen.draw(self.screen)
-        pygame.display.flip()
+    def open_settings(self) -> None:
+        """Show the settings screen as a modal view."""
+        if not self.settings_is_active():
+            self.settings_screen.show()
 
-    def _handle_post_sim(self):
-        end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
-
-        # autorun OFF -> freeze on final frame only
-        if not self.config.general.auto_run:
-            while pygame.time.get_ticks() < end:
-                for event in pygame.event.get():
-                    self.controller.handle(event)
-                self._draw_ui_frame()
-                self.clock.tick(60)
-                if self.controller.save_flag:
-                    self._save()
+    def close_settings(self) -> None:
+        """Hide the settings screen"""
+        if not self.settings_is_active():
             return
+        self.settings_screen.hide()
 
-        # autorun ON -> pause, then save, then reset
-        while pygame.time.get_ticks() < end:
-            for event in pygame.event.get():
-                self.controller.handle(event)
-            self._draw_ui_frame()
-            self.clock.tick(60)
-            if self.controller.save_flag:
-                self._save()
+    # toggle fullscreen
+    def toggle_fullscreen(self) -> None:
+        self.config.display.fullscreen = not self.config.display.fullscreen
+        res = (self.config.display.width, self.config.display.height)
+        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
+        pygame.display.set_mode(res, flags)
 
-        self._reset_simulation()
+    # ------------------------------------------------------------------
+    # Render
+    # ------------------------------------------------------------------
 
     def _draw_generation(self, cells) -> None:
         """Draw one CA generation row onto the CA surface."""
@@ -198,23 +190,39 @@ class PygameRunner:
                 (x, y, self.engine.cell_size, self.engine.cell_size),
             )
 
-    def _initialize_pygame(self):
-        # recreate display
-        res = (self.config.display.width, self.config.display.height)
-        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
-        self.screen = pygame.display.set_mode(res, flags)
+    def _draw_ui_frame(self):
+        self.screen.blit(self.ca_surface, (0, 0))
+        self.ui_bar.draw(self.screen)
+        if self.config.general.show_info:
+            self._draw_info()
+        if self.settings_screen.is_active():
+            self.settings_screen.draw(self.screen)
+        pygame.display.flip()
 
-        # recreate CA surface
-        self.ca_surface = pygame.Surface(res)
-        self.ca_surface.fill(self.config.colors.ca_bg_color)
+    def _handle_post_sim(self):
+        end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
 
-    def _reset_simulation(self) -> None:
-        """Reset CA simulation to initial state."""
+        # autorun OFF -> freeze on final frame only
+        if not self.config.general.auto_run:
+            while pygame.time.get_ticks() < end:
+                for event in pygame.event.get():
+                    self.controller.handle(event)
+                self._draw_ui_frame()
+                self.clock.tick(60)
+                if self.save_flag:
+                    self._save()
+            return
 
-        new_rule = self.engine.reset()
-        self.ruleset_code = new_rule
-        self.ca_surface.fill(self.config.colors.ca_bg_color)
-        print(f"Current Rule: {new_rule}")
+        # autorun ON -> pause, then save, then reset
+        while pygame.time.get_ticks() < end:
+            for event in pygame.event.get():
+                self.controller.handle(event)
+            self._draw_ui_frame()
+            self.clock.tick(60)
+            if self.save_flag:
+                self._save()
+
+        self._reset_simulation()
 
     def _draw_info(self) -> None:
         """Draw the info overlay on top of the CA surface."""
@@ -235,6 +243,28 @@ class PygameRunner:
         box.fill((0, 0, 0, 120))
         self.screen.blit(box, (0, 0))
         self.screen.blit(text, (padding, padding // 2))
+
+    # --------------------------------------------------------
+    # initialize, reset, save
+    # --------------------------------------------------------
+
+    def _initialize_pygame(self):
+        # recreate display
+        res = (self.config.display.width, self.config.display.height)
+        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
+        self.screen = pygame.display.set_mode(res, flags)
+
+        # recreate CA surface
+        self.ca_surface = pygame.Surface(res)
+        self.ca_surface.fill(self.config.colors.ca_bg_color)
+
+    def _reset_simulation(self) -> None:
+        """Reset CA simulation to initial state."""
+
+        new_rule = self.engine.reset()
+        self.ruleset_code = new_rule
+        self.ca_surface.fill(self.config.colors.ca_bg_color)
+        print(f"Current Rule: {new_rule}")
 
     def _save(self) -> None:
         """Save the current CA surface as an image."""

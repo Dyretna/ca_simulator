@@ -14,14 +14,13 @@ from pygame_automata.ui.theme import (
 from ..button import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
-    from pygame_automata.config import Config
-    from pygame_automata.ui.controller import Controller
+    from pygame_automata.pygame_runner import PygameRunner
 
 
 class SettingsScreen:
-    def __init__(self, config: "Config", controller: "Controller"):
-        self.config = config
-        self.controller = controller
+    def __init__(self, runner: "PygameRunner"):
+        self.config = runner.config
+        self.actions = runner.actions
         self.active = False
 
         # fonts
@@ -60,7 +59,7 @@ class SettingsScreen:
     def is_active(self):
         return self.active
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event):
         if not self.active:
             return
 
@@ -143,7 +142,7 @@ class SettingsScreen:
             active = w == self.config.display.width and h == self.config.display.height
             res_row.add(
                 f"{w}x{h}",
-                lambda w=w, h=h: self.controller.set_resolution(w, h),
+                lambda w=w, h=h: self.actions.set_resolution(w, h),
                 active,
             )
 
@@ -153,7 +152,7 @@ class SettingsScreen:
             active = self.config.display.fullscreen == fs
             fs_row.add(
                 "ON" if fs else "OFF",
-                lambda fs=fs: self.controller.set_fullscreen(fs),
+                lambda fs=fs: self.actions.set_fullscreen(fs),
                 active,
             )
 
@@ -161,13 +160,13 @@ class SettingsScreen:
         rss_row = TextButtonRow(padding, padding + y, "Ruleset Size")
         for b in [8, 16, 32, 64]:
             active = self.config.engine.bit_size == b
-            rss_row.add(str(b), lambda b=b: self.controller.set_ruleset(b), active)
+            rss_row.add(str(b), lambda b=b: self.actions.set_ruleset(b), active)
 
         y += row_size
         cs_row = TextButtonRow(padding, padding + y, "Cell Size")
         for cs in list(range(1, 11)):
             active = self.config.engine.cell_size == cs
-            cs_row.add(str(cs), lambda cs=cs: self.controller.set_cellsize(cs), active)
+            cs_row.add(str(cs), lambda cs=cs: self.actions.set_cellsize(cs), active)
 
         y += row_size
         mode_row = TextButtonRow(padding, padding + y, "Random Mode")
@@ -175,7 +174,7 @@ class SettingsScreen:
             active = self.config.engine.random_gen == mode
             mode_row.add(
                 "ON" if mode else "OFF",
-                lambda mode=mode: self.controller.set_random_mode(mode),
+                lambda mode=mode: self.actions.set_random_mode(mode),
                 active,
             )
 
@@ -185,7 +184,7 @@ class SettingsScreen:
             active = self.config.general.auto_run == ar
             ar_row.add(
                 "ON" if ar else "OFF",
-                lambda ar=ar: self.controller.set_autorun(ar),
+                lambda ar=ar: self.actions.set_autorun(ar),
                 active,
             )
 
@@ -195,7 +194,7 @@ class SettingsScreen:
             active = self.config.general.show_info == inf
             info_row.add(
                 "ON" if inf else "OFF",
-                lambda inf=inf: self.controller.set_info(inf),
+                lambda inf=inf: self.actions.set_info(inf),
                 active,
             )
 
@@ -227,5 +226,5 @@ class SettingsScreen:
         )
 
     def _apply_changes(self):
-        self.controller.apply_changes()
+        self.actions.update_settings()
         self.hide()

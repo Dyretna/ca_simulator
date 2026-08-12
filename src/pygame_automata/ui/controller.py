@@ -27,11 +27,8 @@ class Controller:
         """
         self.runner = runner
         self.config = runner.config
-
-        self.save_flag = False
-
-        self.mouse_pos: tuple[int, int] = (0, 0)
-        self.mouse_down: bool = False
+        self.settings_screen = runner.settings_screen
+        self.ui_bar = runner.ui_bar
 
     def handle(self, event: pygame.event.Event) -> None:
         """
@@ -40,124 +37,14 @@ class Controller:
         Global events (QUIT, keyboard shortcuts) are handled directly.
         """
 
-        if self.runner.settings_screen.is_active():
-            if event.type == pygame.MOUSEMOTION:
-                self.runner.settings_screen.handle_event(event)
-                return
-
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.runner.settings_screen.handle_event(event)
-                return
-
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.runner.settings_screen.handle_event(event)
-                return
-
+        if self.settings_screen.is_active():
+            self.settings_screen.handle_event(event)
             return
 
-        if event.type == pygame.QUIT:
-            self.stop()
+        elif event.type == pygame.QUIT:
+            self.runner.actions.stop()
             return
 
-        if event.type == pygame.KEYDOWN:
-            self._handle_key(event.key)
+        else:
+            self.ui_bar.handle_event(event)
             return
-
-        if event.type == pygame.MOUSEMOTION:
-            self.runner.ui_bar.handle_event(event)
-
-        if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-            self.runner.ui_bar.handle_event(event)
-
-    def _handle_key(self, key: int) -> None:
-        if key == pygame.K_ESCAPE:
-            self.stop()
-        elif key == pygame.K_SPACE:
-            self.play()
-        elif key == pygame.K_a:
-            self.toggle_autorun()
-        elif key == pygame.K_f:
-            self.toggle_fullscreen()
-        elif key == pygame.K_i:
-            self.toggle_info()
-        elif key == pygame.K_r:
-            self.toggle_random_mode()
-        elif key == pygame.K_s:
-            self.toggle_save()
-
-    # ------------------------------------------------------------
-    # Callbacks
-    # ------------------------------------------------------------
-    def apply_changes(self):
-        """Called from settings"""
-        self.runner.update_settings()
-        print("Display or Engine Updated")
-
-    # --- Setters ---
-    def set_resolution(self, w, h):
-        self.config.display.width = w
-        self.config.display.height = h
-
-    def set_fullscreen(self, fs):
-        self.config.display.fullscreen = fs
-
-    def set_ruleset(self, b):
-        self.config.engine.bit_size = b
-
-    def set_cellsize(self, cs):
-        self.config.engine.cell_size = cs
-
-    def set_random_mode(self, m):
-        self.config.engine.random_gen = m
-
-    def set_autorun(self, ar):
-        self.config.general.auto_run = ar
-
-    def set_info(self, inf):
-        self.config.general.show_info = inf
-
-    # --- Toggles ---
-    def toggle_save(self) -> None:
-        "Save when CA simulation is done"
-        self.save_flag = not self.save_flag
-
-    def toggle_autorun(self) -> None:
-        self.config.general.auto_run = not self.config.general.auto_run
-
-    def toggle_fullscreen(self) -> None:
-        self.config.display.fullscreen = not self.config.display.fullscreen
-        res = (self.config.display.width, self.config.display.height)
-        flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
-        pygame.display.set_mode(res, flags)
-
-    def toggle_info(self) -> None:
-        """Toggle information overlay."""
-        self.config.general.show_info = not self.config.general.show_info
-
-    def toggle_random_mode(self) -> None:
-        self.config.engine.random_gen = not self.config.engine.random_gen
-        self.apply_changes()
-
-    # --- play and stop ---
-    def play(self):
-        """Plays next or resets the simulation"""
-        self.runner._reset_simulation()
-
-    def stop(self) -> None:
-        """Stop the main loop."""
-        self.runner.running = False
-
-    # --- Open / close settings ---
-    def settings_is_active(self):
-        return self.runner.settings_screen.is_active()
-
-    def open_settings(self) -> None:
-        """Show the settings screen as a modal view."""
-        if not self.settings_is_active():
-            self.runner.settings_screen.show()
-
-    def close_settings(self) -> None:
-        """Hide the settings screen"""
-        if not self.settings_is_active():
-            return
-        self.runner.settings_screen.hide()

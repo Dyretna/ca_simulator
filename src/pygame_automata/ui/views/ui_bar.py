@@ -1,22 +1,24 @@
 # src/pygame_automata/ui/pygame_ui/views/ui_bar.py
 
+from typing import TYPE_CHECKING
 
 import pygame
 
 from pygame_automata.ui.button import ButtonBase, IconButton
 from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
 
-from ...config import Config
-from ..controller import Controller
+if TYPE_CHECKING:
+    from pygame_automata.pygame_runner import PygameRunner
 
 
 class UIBar:
-    def __init__(self, config: "Config", controller: "Controller"):
-        self.config = config
-        self.controller = controller
+    def __init__(self, runner: "PygameRunner"):
+        self.runner = runner
+        self.config = self.runner.config
+        self.actions = self.runner.actions
 
         # UI bar surface
-        self.width = config.display.width
+        self.width = self.config.display.width
         self.height = 60
         self.surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
@@ -30,6 +32,15 @@ class UIBar:
 
         # internal state
         self.offset_y = 0
+
+    # ------------------------------------------------------------------
+    # Rebuild after display changes
+    # ------------------------------------------------------------------
+    def rebuild(self):
+        self.width = self.config.display.width
+        self.surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.buttons.clear()
+        self._build_buttons()
 
     # ------------------------------------------------------------------
     # Drawing
@@ -59,6 +70,9 @@ class UIBar:
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             self._on_mouse_up(event.pos)
 
+        elif event.type == pygame.KEYDOWN:
+            self._handle_key(event.key)
+
     def _to_local(self, screen_pos):
         return screen_pos[0], screen_pos[1] - self.offset_y
 
@@ -77,6 +91,22 @@ class UIBar:
         for btn in self.buttons:
             btn.on_mouse_up(local)
 
+    def _handle_key(self, key: int) -> None:
+        if key == pygame.K_ESCAPE:
+            self.actions.stop()
+        elif key == pygame.K_SPACE:
+            self.actions.play()
+        elif key == pygame.K_a:
+            self.actions.toggle_autorun()
+        elif key == pygame.K_f:
+            self.actions.toggle_fullscreen()
+        elif key == pygame.K_i:
+            self.actions.toggle_info()
+        elif key == pygame.K_r:
+            self.actions.toggle_random_mode()
+        elif key == pygame.K_s:
+            self.actions.toggle_save()
+
     # ------------------------------------------------------------------
     # Button construction
     # ------------------------------------------------------------------
@@ -91,15 +121,15 @@ class UIBar:
         add(
             "icon_settings.png",
             start,
-            self.controller.open_settings,
-            active=lambda: self.controller.settings_is_active(),
+            self.actions.open_settings,
+            active=lambda: self.actions.settings_is_active(),
         )
 
         start += 60
         add(
             "icon_fullscreen.png",
             start,
-            self.controller.toggle_fullscreen,
+            self.actions.toggle_fullscreen,
             active=lambda: self.config.display.fullscreen,
         )
 
@@ -107,7 +137,7 @@ class UIBar:
         add(
             "icon_i.png",
             start,
-            self.controller.toggle_info,
+            self.actions.toggle_info,
             active=lambda: self.config.general.show_info,
         )
 
@@ -115,7 +145,7 @@ class UIBar:
         add(
             "icon_R.png",
             start,
-            self.controller.toggle_random_mode,
+            self.actions.toggle_random_mode,
             active=lambda: self.config.engine.random_gen,
         )
 
@@ -123,7 +153,7 @@ class UIBar:
         add(
             "icon_autorun.png",
             start,
-            self.controller.toggle_autorun,
+            self.actions.toggle_autorun,
             active=lambda: self.config.general.auto_run,
         )
 
@@ -131,12 +161,12 @@ class UIBar:
         add(
             "icon_save.png",
             start,
-            self.controller.toggle_save,
-            active=lambda: self.controller.save_flag,
+            self.actions.toggle_save,
+            active=lambda: self.runner.save_flag,
         )
 
         start += 60
-        add("icon_play.png", start, self.controller.play)
+        add("icon_play.png", start, self.actions.play)
 
         # stop at the right end
-        add("icon_stop.png", self.config.display.width - 60, self.controller.stop)
+        add("icon_stop.png", self.config.display.width - 60, self.actions.stop)

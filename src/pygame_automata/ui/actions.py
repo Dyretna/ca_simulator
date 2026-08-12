@@ -1,0 +1,79 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygame_automata.pygame_runner import PygameRunner
+
+
+class Actions:
+    def __init__(self, runner: "PygameRunner"):
+        self.runner = runner
+        self.config = runner.config
+
+    # --- Setters ---
+    def set_resolution(self, w, h):
+        self.config.display.width = w
+        self.config.display.height = h
+
+    def set_fullscreen(self, fs):
+        self.config.display.fullscreen = fs
+
+    def set_ruleset(self, b):
+        self.config.engine.bit_size = b
+
+    def set_cellsize(self, cs):
+        self.config.engine.cell_size = cs
+
+    def set_random_mode(self, m):
+        self.config.engine.random_gen = m
+
+    def set_autorun(self, ar):
+        self.config.general.auto_run = ar
+
+    def set_info(self, inf):
+        self.config.general.show_info = inf
+
+    # --- Toggles ---
+    def toggle_save(self) -> None:
+        "Save when CA simulation is done"
+        self.runner.save_flag = not self.runner.save_flag
+
+    def toggle_autorun(self) -> None:
+        self.config.general.auto_run = not self.config.general.auto_run
+
+    def toggle_fullscreen(self) -> None:
+        self.runner.toggle_fullscreen()
+
+    def toggle_info(self) -> None:
+        """Toggle information overlay."""
+        self.config.general.show_info = not self.config.general.show_info
+
+    def toggle_random_mode(self) -> None:
+        self.config.engine.random_gen = not self.config.engine.random_gen
+        self.update_settings()
+
+    # --- play and stop ---
+
+    def play(self):
+        """Plays next or resets the simulation"""
+        self.runner.play()
+
+    def stop(self) -> None:
+        """Stop the main loop."""
+        self.runner.stop()
+
+    # --- Settings ---
+
+    def update_settings(self):
+        self.runner.update_settings()
+        print("Display or Engine Updated")
+
+    def settings_is_active(self):
+        return self.runner.settings_is_active()
+
+    def open_settings(self) -> None:
+        """Show the settings screen as a modal view."""
+        self.runner.open_settings()
+
+    def close_settings(self) -> None:
+        """Hide the settings screen"""
+        self.runner.close_settings()
