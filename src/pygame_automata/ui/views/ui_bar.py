@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from pygame_automata.ui.button import ButtonBase, IconButton
+from pygame_automata.ui.components import ButtonBase, ColorSwatchButton, IconButton
 from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
 
 if TYPE_CHECKING:
@@ -28,7 +28,8 @@ class UIBar:
 
         # buttons
         self.buttons: list[None | ButtonBase,] = []
-        self._build_buttons()
+        self._build_icon_buttons()
+        self._build_cs_buttons()
 
         # internal state
         self.offset_y = 0
@@ -40,7 +41,8 @@ class UIBar:
         self.width = self.config.display.width
         self.surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.buttons.clear()
-        self._build_buttons()
+        self._build_icon_buttons()
+        self._build_cs_buttons()
 
     # ------------------------------------------------------------------
     # Drawing
@@ -108,9 +110,25 @@ class UIBar:
             self.actions.toggle_save()
 
     # ------------------------------------------------------------------
+    # callbacks
+    # ------------------------------------------------------------------
+
+    def _open_fg_picker(self):
+        self.runner.colorpicker.show(
+            input_color=self.config.colors.ca_fg_color,
+            callback=self.actions.set_fg_color,
+        )
+
+    def _open_bg_picker(self):
+        self.runner.colorpicker.show(
+            input_color=self.config.colors.ca_bg_color,
+            callback=self.actions.set_bg_color,
+        )
+
+    # ------------------------------------------------------------------
     # Button construction
     # ------------------------------------------------------------------
-    def _build_buttons(self):
+    def _build_icon_buttons(self):
         start = 10
 
         def add(icon: str, start: int, func, active=None):
@@ -170,3 +188,26 @@ class UIBar:
 
         # stop at the right end
         add("icon_stop.png", self.config.display.width - 60, self.actions.stop)
+
+    def _build_cs_buttons(self):
+        icon_path = self.config.paths.assets_dir / "icon_stop.png"
+
+        start = 500
+        pos = (start, 10, 50, 40)
+        fg_btn = ColorSwatchButton(
+            *pos,
+            get_color=lambda: self.config.colors.ca_fg_color,
+            icon_path=icon_path,
+            callback=self._open_fg_picker,
+        )
+
+        pos = (start + 60, 10, 50, 40)
+        bg_btn = ColorSwatchButton(
+            *pos,
+            get_color=lambda: self.config.colors.ca_bg_color,
+            icon_path=icon_path,
+            callback=self._open_bg_picker,
+        )
+
+        self.buttons.append(fg_btn)
+        self.buttons.append(bg_btn)

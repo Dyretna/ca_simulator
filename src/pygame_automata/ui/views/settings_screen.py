@@ -11,7 +11,7 @@ from pygame_automata.ui.theme import (
     TITLE_FONT,
 )
 
-from ..button import TextButton, TextButtonRow
+from ..components import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
     from pygame_automata.pygame_runner import PygameRunner
@@ -27,19 +27,8 @@ class SettingsScreen:
         self.font = pygame.font.SysFont(**DEFAULT_FONT)
         self.title_font = pygame.font.SysFont(**TITLE_FONT)
 
-        # panel geometry
-        self.panel_w = 0
-        self.panel_h = 0
-        self.panel_x = 0
-        self.panel_y = 0
-        self.settings_panel = None
-
         # rows
         self.rows = []
-
-        # buttons
-        self.apply_button = None
-        self.cancel_button = None
 
     # ------------------------------------------------------------
     # Public API

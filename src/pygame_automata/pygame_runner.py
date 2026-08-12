@@ -29,6 +29,7 @@ from pygame_automata.core.ca_engine import CAEngine
 from pygame_automata.ui.actions import Actions
 from pygame_automata.ui.controller import Controller
 from pygame_automata.ui.theme import DEFAULT_FONT
+from pygame_automata.ui.views.colorpicker import ColorPicker
 from pygame_automata.ui.views.settings_screen import SettingsScreen
 from pygame_automata.ui.views.ui_bar import UIBar
 
@@ -71,6 +72,7 @@ class PygameRunner:
 
         self.actions = Actions(self)
         self.settings_screen = SettingsScreen(self)
+        self.colorpicker = ColorPicker(self)
         self.ui_bar = UIBar(self)
         self.controller = Controller(self)
 
@@ -98,7 +100,7 @@ class PygameRunner:
                 self.controller.handle(event)
 
             # SIMULATION always runs unless settings is open
-            if not self.settings_screen.is_active():
+            if not self.settings_screen.is_active() or not self.colorpicker.is_active():
                 # normal step
                 cells = self.engine.step()
                 self._draw_generation(cells)
@@ -129,10 +131,7 @@ class PygameRunner:
     def update_settings(self) -> None:
         """
         Rebuild engine and surfaces after settings change.
-
-        Called by SettingsScreen._apply_changes().
         """
-        # update engine based on runner attributes
         self.engine = CAEngine(
             width=self.config.display.width,
             cell_size=self.config.engine.cell_size,
@@ -156,6 +155,20 @@ class PygameRunner:
         if not self.settings_is_active():
             return
         self.settings_screen.hide()
+
+    # --- ColorPicker ---
+
+    def colorpicker_is_active(self):
+        return self.colorpicker.is_active()
+
+    def open_colorpicker(self) -> None:
+        if not self.colorpicker_is_active():
+            self.colorpicker.show()
+
+    def close_colorpicker(self) -> None:
+        if not self.colorpicker_is_active():
+            return
+        self.colorpicker.hide()
 
     # toggle fullscreen
     def toggle_fullscreen(self) -> None:
@@ -197,6 +210,8 @@ class PygameRunner:
             self._draw_info()
         if self.settings_screen.is_active():
             self.settings_screen.draw(self.screen)
+        if self.colorpicker.is_active():
+            self.colorpicker.draw(self.screen)
         pygame.display.flip()
 
     def _handle_post_sim(self):

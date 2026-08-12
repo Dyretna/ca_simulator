@@ -28,6 +28,7 @@ class Controller:
         self.runner = runner
         self.config = runner.config
         self.settings_screen = runner.settings_screen
+        self.colorpicker = runner.colorpicker
         self.ui_bar = runner.ui_bar
 
     def handle(self, event: pygame.event.Event) -> None:
@@ -40,6 +41,9 @@ class Controller:
         if self.settings_screen.is_active():
             self.settings_screen.handle_event(event)
             return
+
+        elif self.colorpicker.is_active():
+            self.colorpicker.handle_event(event)
 
         elif event.type == pygame.QUIT:
             self.runner.actions.stop()

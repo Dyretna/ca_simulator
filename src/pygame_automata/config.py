@@ -7,9 +7,9 @@ from pathlib import Path
 
 @dataclass
 class DisplaySettings:
-    width: int = 1280
-    height: int = 720
-    fullscreen: bool = False
+    width: int = 1920
+    height: int = 1080
+    fullscreen: bool = True
 
 
 @dataclass
@@ -28,13 +28,13 @@ class EngineSettings:
 
 @dataclass
 class ColorSettings:
-    ca_bg_color: tuple[int, int, int] = (10, 20, 30)
-    ca_fg_color: tuple[int, int, int] = (100, 130, 50)
+    ca_bg_color: tuple[int, int, int, int] = (10, 20, 30, 255)
+    ca_fg_color: tuple[int, int, int, int] = (100, 130, 50, 255)
 
 
 @dataclass
 class PathsSettings:
-    project_root: Path = Path(os.getenv("PROJECT_ROOT", "."))
+    project_root: Path = Path(os.getenv("PROJECT_ROOT", Path.cwd()))
     output_dir: Path = field(init=False)
     assets_dir: Path = field(init=False)
 

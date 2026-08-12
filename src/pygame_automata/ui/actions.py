@@ -1,7 +1,10 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from pygame_automata.pygame_runner import PygameRunner
+
+
+ColorTuple = Tuple[int, int, int, int]
 
 
 class Actions:
@@ -49,6 +52,14 @@ class Actions:
 
     def toggle_random_mode(self) -> None:
         self.config.engine.random_gen = not self.config.engine.random_gen
+        self.update_settings()
+
+    def set_fg_color(self, c: ColorTuple) -> None:
+        self.config.colors.ca_fg_color = (c[0], c[1], c[2], c[3])
+        self.update_settings()
+
+    def set_bg_color(self, c: ColorTuple) -> None:
+        self.config.colors.ca_bg_color = (c[0], c[1], c[2], c[3])
         self.update_settings()
 
     # --- play and stop ---
