@@ -14,10 +14,12 @@ class Actions:
 
     # --- Setters ---
     def set_resolution(self, w, h):
+        self.runner.display_changes = True
         self.config.display.width = w
         self.config.display.height = h
 
     def set_fullscreen(self, fs):
+        self.runner.display_changes = True
         self.config.display.fullscreen = fs
 
     def set_ruleset(self, b):

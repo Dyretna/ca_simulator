@@ -77,6 +77,7 @@ class PygameRunner:
         self.controller = Controller(self)
 
         self.save_flag = False
+        self.display_changes = False
 
     # ------------------------------------------------------------------
     # Main loop
@@ -142,7 +143,8 @@ class PygameRunner:
             ruleset_code=self.ruleset_code,
             random=self.config.engine.random_gen,
         )
-        self._initialize_pygame()
+        if self.display_changes:
+            self._initialize_pygame()
         self.ui_bar.rebuild()
 
     def settings_is_active(self):
@@ -266,7 +268,7 @@ class PygameRunner:
     # initialize, reset, save
     # --------------------------------------------------------
 
-    def _initialize_pygame(self):
+    def _initialize_pygame(self) -> None:
         # recreate display
         res = (self.config.display.width, self.config.display.height)
         flags = pygame.FULLSCREEN if self.config.display.fullscreen else 0
@@ -275,6 +277,9 @@ class PygameRunner:
         # recreate CA surface
         self.ca_surface = pygame.Surface(res)
         self.ca_surface.fill(self.config.colors.ca_bg_color)
+
+        # reset flag if updating
+        self.display_changes = False
 
     def _reset_simulation(self) -> None:
         """Reset CA simulation to initial state."""
