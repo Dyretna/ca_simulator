@@ -124,6 +124,15 @@ class ColorPicker:
             self.cancel_button.on_mouse_down((cp_local_x, cp_local_y))
 
     def draw(self, surface: pygame.Surface) -> None:
+        if not self.active:
+            return
+
+        # dark overlay - dim background
+        w, h = surface.get_size()
+        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 160))
+        surface.blit(overlay, (0, 0))
+
         self.cp_panel.fill(SETTINGS_PANEL_BG)
         self._update_color()
 
