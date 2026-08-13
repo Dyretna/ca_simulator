@@ -37,17 +37,16 @@ class Controller:
 
         Global events (QUIT, keyboard shortcuts) are handled directly.
         """
+        if event.type == pygame.QUIT:
+            self.runner.actions.quit()
+            return
 
-        if self.settings_screen.is_active():
+        elif self.settings_screen.is_active():
             self.settings_screen.handle_event(event)
             return
 
         elif self.colorpicker.is_active():
             self.colorpicker.handle_event(event)
-
-        elif event.type == pygame.QUIT:
-            self.runner.actions.stop()
-            return
 
         else:
             self.ui_bar.handle_event(event)

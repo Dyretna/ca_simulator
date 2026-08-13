@@ -125,8 +125,8 @@ class PygameRunner:
         """Plays next or resets the simulation"""
         self._reset_simulation()
 
-    def stop(self) -> None:
-        """Stop the main loop."""
+    def quit(self) -> None:
+        """Stops the main loop, which quits Pygame."""
         self.running = False
 
     # --- Settings ---

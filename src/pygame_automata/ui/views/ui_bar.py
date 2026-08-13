@@ -95,7 +95,7 @@ class UIBar:
 
     def _handle_key(self, key: int) -> None:
         if key == pygame.K_ESCAPE:
-            self.actions.stop()
+            self.actions.quit()
         elif key == pygame.K_SPACE:
             self.actions.play()
         elif key == pygame.K_a:
@@ -187,7 +187,7 @@ class UIBar:
         add("icon_play.png", start, self.actions.play)
 
         # stop at the right end
-        add("icon_standby.png", self.config.display.width - 60, self.actions.stop)
+        add("icon_standby.png", self.config.display.width - 60, self.actions.quit)
 
     def _build_cs_buttons(self):
         icon_path = self.config.paths.assets_dir / "icon_stop.png"

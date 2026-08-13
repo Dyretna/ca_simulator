@@ -68,9 +68,9 @@ class Actions:
         """Plays next or resets the simulation"""
         self.runner.play()
 
-    def stop(self) -> None:
-        """Stop the main loop."""
-        self.runner.stop()
+    def quit(self) -> None:
+        """Stop the main loop, and quits pygame."""
+        self.runner.quit()
 
     # --- Settings ---
 
