@@ -100,7 +100,7 @@ class PygameRunner:
                 self.controller.handle(event)
 
             # SIMULATION always runs unless settings is open
-            if not self.settings_screen.is_active() or not self.colorpicker.is_active():
+            if not self.settings_screen.is_active() or self.colorpicker.is_active():
                 # normal step
                 cells = self.engine.step()
                 self._draw_generation(cells)

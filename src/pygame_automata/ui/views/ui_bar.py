@@ -187,7 +187,7 @@ class UIBar:
         add("icon_play.png", start, self.actions.play)
 
         # stop at the right end
-        add("icon_stop.png", self.config.display.width - 60, self.actions.stop)
+        add("icon_standby.png", self.config.display.width - 60, self.actions.stop)
 
     def _build_cs_buttons(self):
         icon_path = self.config.paths.assets_dir / "icon_stop.png"
