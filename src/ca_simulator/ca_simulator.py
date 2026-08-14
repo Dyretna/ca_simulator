@@ -277,7 +277,7 @@ class CASimulator:
         Global events (QUIT, keyboard shortcuts) are handled directly.
         """
         if event.type == pygame.QUIT:
-            self.runner.actions.quit()
+            self.quit()
             return
 
         elif self.settings_screen.is_active():
