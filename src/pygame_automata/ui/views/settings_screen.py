@@ -14,11 +14,11 @@ from pygame_automata.ui.theme import (
 from ..components import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
-    from ...pygame_runner import PygameRunner
+    from ...ca_simulator import CASimulator
 
 
 class SettingsScreen:
-    def __init__(self, runner: "PygameRunner"):
+    def __init__(self, runner: "CASimulator"):
         self.config = runner.config
         self.actions = runner.actions
         self.active = False

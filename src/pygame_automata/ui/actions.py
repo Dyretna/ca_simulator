@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
-    from ..pygame_runner import PygameRunner
+    from ..ca_simulator import CASimulator
 
 
 ColorTuple = Tuple[int, int, int, int]
 
 
 class Actions:
-    def __init__(self, runner: "PygameRunner"):
+    def __init__(self, runner: "CASimulator"):
         self.runner = runner
         self.config = runner.config
 

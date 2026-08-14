@@ -21,20 +21,28 @@ before resuming normal execution.
 """
 
 import os
+from enum import Enum, auto
 
 import pygame
 
 from .config import Config
 from .core.ca_engine import CAEngine
 from .ui.actions import Actions
-from .ui.controller import Controller
 from .ui.theme import DEFAULT_FONT
 from .ui.views.colorpicker import ColorPicker
 from .ui.views.settings_screen import SettingsScreen
 from .ui.views.ui_bar import UIBar
 
 
-class PygameRunner:
+class RunState(Enum):
+    INITIALIZATION = auto()
+    RUNNING = auto()
+    IDLE = auto()
+    RESET = auto()
+    QUIT = auto()
+
+
+class CASimulator:
     """
     Main pygame-based runner for the CAEngine.
     """
@@ -55,7 +63,7 @@ class PygameRunner:
 
         # timing
         self.clock = pygame.time.Clock()
-        self.running = False
+        self.fps = 60
 
         # core engine
         self.ruleset_code: int = 30
@@ -74,7 +82,7 @@ class PygameRunner:
         self.settings_screen = SettingsScreen(self)
         self.colorpicker = ColorPicker(self)
         self.ui_bar = UIBar(self)
-        self.controller = Controller(self)
+        self.state = RunState.INITIALIZATION
 
         self.save_flag = False
         self.display_changes = False
@@ -85,7 +93,8 @@ class PygameRunner:
     def run(self) -> None:
         """Main execution loop."""
 
-        self.running = True
+        # self state is running
+        self._set_state(RunState.RUNNING)
         self.ca_surface.fill(self.config.colors.ca_bg_color)
         print(f"Ruleset Bitsize: {self.config.engine.bit_size}")
         print(f"First Rule: {self.ruleset_code}")
@@ -95,40 +104,58 @@ class PygameRunner:
         self.ui_bar.draw(self.screen)
         pygame.display.flip()
 
-        while self.running:
-            # INPUT
-            for event in pygame.event.get():
-                self.controller.handle(event)
+        while self.state != RunState.QUIT:
+            if self.state == RunState.RUNNING:
+                # INPUT
+                for event in pygame.event.get():
+                    self._handle_event(event)
 
-            # SIMULATION always runs unless settings or colorpicker is open
-            if (
-                not self.settings_screen.is_active()
-                and not self.colorpicker.is_active()
-            ):
-                # normal step
-                cells = self.engine.step()
-                self._draw_generation(cells)
+                # SIMULATION always runs unless settings or colorpicker is open
+                if (
+                    not self.settings_screen.is_active()
+                    and not self.colorpicker.is_active()
+                ):
+                    # normal step
+                    cells = self.engine.step()
+                    self._step(cells)
 
-                # reset when full
-                if self.engine.simulation_done(self.config.display.height):
-                    if self._handle_post_sim():
-                        # autorun OFF -> freeze on final frame
-                        continue
+                    # reset when full
+                    if self.engine.simulation_done(self.config.display.height):
+                        self._set_state(RunState.IDLE)
+
+            elif self.state == RunState.IDLE:
+                end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
+
+                # autorun ON -> pause, then save, then reset
+                while pygame.time.get_ticks() < end:
+                    for event in pygame.event.get():
+                        self._handle_event(event)
+                    self._draw_ui_frame()
+                    self.clock.tick(self.fps)
+                    if self.save_flag:
+                        self._save()
+
+                if self.config.general.auto_run:
+                    self._set_state(RunState.RESET)
+
+            elif self.state == RunState.RESET:
+                self._reset_simulation()
+                self._set_state(RunState.RUNNING)
 
             # draw ui and settings
             self._draw_ui_frame()
-            self.clock.tick(60)
+            self.clock.tick(self.fps)
 
         print("Exiting...")
         pygame.quit()
 
     def play(self):
         """Plays next or resets the simulation"""
-        self._reset_simulation()
+        self._set_state(RunState.RESET)
 
     def quit(self) -> None:
         """Stops the main loop, which quits Pygame."""
-        self.running = False
+        self._set_state(RunState.QUIT)
 
     # --- Settings ---
 
@@ -186,7 +213,7 @@ class PygameRunner:
     # Render
     # ------------------------------------------------------------------
 
-    def _draw_generation(self, cells) -> None:
+    def _step(self, cells) -> None:
         """Draw one CA generation row onto the CA surface."""
 
         y = self.engine.generation * self.engine.cell_size
@@ -219,31 +246,6 @@ class PygameRunner:
             self.colorpicker.draw(self.screen)
         pygame.display.flip()
 
-    def _handle_post_sim(self):
-        end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
-
-        # autorun OFF -> freeze on final frame only
-        if not self.config.general.auto_run:
-            while pygame.time.get_ticks() < end:
-                for event in pygame.event.get():
-                    self.controller.handle(event)
-                self._draw_ui_frame()
-                self.clock.tick(60)
-                if self.save_flag:
-                    self._save()
-            return
-
-        # autorun ON -> pause, then save, then reset
-        while pygame.time.get_ticks() < end:
-            for event in pygame.event.get():
-                self.controller.handle(event)
-            self._draw_ui_frame()
-            self.clock.tick(60)
-            if self.save_flag:
-                self._save()
-
-        self._reset_simulation()
-
     def _draw_info(self) -> None:
         """Draw the info overlay on top of the CA surface."""
 
@@ -265,8 +267,32 @@ class PygameRunner:
         self.screen.blit(text, (padding, padding // 2))
 
     # --------------------------------------------------------
-    # initialize, reset, save
+    # initialize, reset, save, set state
     # --------------------------------------------------------
+
+    def _handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single pygame event.
+
+        Global events (QUIT, keyboard shortcuts) are handled directly.
+        """
+        if event.type == pygame.QUIT:
+            self.runner.actions.quit()
+            return
+
+        elif self.settings_screen.is_active():
+            self.settings_screen.handle_event(event)
+            return
+
+        elif self.colorpicker.is_active():
+            self.colorpicker.handle_event(event)
+
+        else:
+            self.ui_bar.handle_event(event)
+            return
+
+    def _set_state(self, state: RunState):
+        self.state = state
 
     def _initialize_pygame(self) -> None:
         # recreate display

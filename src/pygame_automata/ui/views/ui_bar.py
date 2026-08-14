@@ -8,11 +8,11 @@ from ..components import ButtonBase, ColorSwatchButton, IconButton
 from ..theme import UI_BAR_ALPHA, UI_BAR_BG
 
 if TYPE_CHECKING:
-    from ...pygame_runner import PygameRunner
+    from ...ca_simulator import CASimulator
 
 
 class UIBar:
-    def __init__(self, runner: "PygameRunner"):
+    def __init__(self, runner: "CASimulator"):
         self.runner = runner
         self.config = self.runner.config
         self.actions = self.runner.actions

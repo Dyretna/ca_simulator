@@ -1,7 +1,7 @@
 # run_pygame
 
-from pygame_automata.pygame_runner import PygameRunner
+from pygame_automata.ca_simulator import CASimulator
 
-runner = PygameRunner()
+runner = CASimulator()
 
 runner.run()
