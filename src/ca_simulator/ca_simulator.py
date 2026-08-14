@@ -167,6 +167,7 @@ class CASimulator:
         if self.display_changes:
             self._initialize_pygame()
         self.ui_bar.rebuild()
+        self._set_state(RunState.RESET)
 
     def settings_is_active(self):
         return self.settings_screen.is_active()
