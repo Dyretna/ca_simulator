@@ -43,24 +43,16 @@ class RunState(Enum):
 
 
 class CASimulator:
-    """
-    Main pygame-based runner for the CAEngine.
-    """
-
     def __init__(self):
-        """
-        Parameters
-        ----------
-        config : Config
-            Configuration object providing initial width, height,
-            cell_size, ruleset, and other parameters.
-        """
         pygame.init()
         pygame.display.set_caption("Cellular Automata")
 
         # resolve paths
         self.config = Config()
         self.state = RunState.INITIALIZATION
+        rows = [(f"{k:<8} : {v}") for k, v in self.config.__dict__.items()]
+        rows.insert(0, "INITIALIZATION")
+        print("\n\t- ".join(rows), "\n")
 
         # timing
         self.clock = pygame.time.Clock()
@@ -106,47 +98,48 @@ class CASimulator:
         self.ui_bar.draw(self.screen)
         pygame.display.flip()
 
-        while self.state != RunState.QUIT:
-            if self.state == RunState.RUNNING:
-                # INPUT
-                for event in pygame.event.get():
-                    self._handle_event(event)
+        while True:
+            for event in pygame.event.get():
+                self._handle_event(event)
 
-                # SIMULATION always runs unless settings or colorpicker is open
-                if (
-                    not self.settings_screen.is_active()
-                    and not self.colorpicker.is_active()
-                ):
-                    # normal step
-                    cells = self.engine.step()
-                    self._step(cells)
+            match self.state:
+                case RunState.RUNNING:
+                    # SIMULATION runs unless settings or colorpicker is open
+                    if (
+                        not self.settings_screen.is_active()
+                        and not self.colorpicker.is_active()
+                    ):
+                        # normal step
+                        cells = self.engine.step()
+                        self._step(cells)
 
-                    # set State to idle
-                    if self.engine.simulation_done(self.config.display.height):
-                        self.idle_end = pygame.time.get_ticks() + self.idle_pause_ms
-                        self._set_state(RunState.IDLE)
+                        # set State to idle
+                        if self.engine.simulation_done(self.config.display.height):
+                            self.idle_end = pygame.time.get_ticks() + self.idle_pause_ms
+                            self._set_state(RunState.IDLE)
 
-            # If Autorun is active, set to reset after short break
-            elif self.state == RunState.IDLE:
-                for event in pygame.event.get():
-                    self._handle_event(event)
-                if self.save_flag:
-                    self._save()
+                case RunState.IDLE:
+                    # If Autorun is active,
+                    # set to reset after short break
+                    if self.save_flag:
+                        self._save()
 
-                if pygame.time.get_ticks() >= self.idle_end:
-                    if self.config.general.auto_run:
-                        self._set_state(RunState.RESET)
+                    if pygame.time.get_ticks() >= self.idle_end:
+                        if self.config.general.auto_run:
+                            self._set_state(RunState.RESET)
 
-            elif self.state == RunState.RESET:
-                self._reset_simulation()
-                self._set_state(RunState.RUNNING)
+                case RunState.RESET:
+                    self._reset_simulation()
+                    self._set_state(RunState.RUNNING)
+
+                case RunState.QUIT:
+                    print("Exiting...")
+                    pygame.quit()
+                    return
 
             # always draw UI and tick
             self._draw_ui_frame()
             self.clock.tick(self.fps)
-
-        print("Exiting...")
-        pygame.quit()
 
     def play(self):
         """Plays next or resets the simulation"""
@@ -159,9 +152,7 @@ class CASimulator:
     # --- Settings ---
 
     def update_settings(self) -> None:
-        """
-        Rebuild engine and surfaces after settings change.
-        """
+        """Rebuild engine and surfaces after settings change."""
         self.engine = CAEngine(
             width=self.config.display.width,
             cell_size=self.config.engine.cell_size,
@@ -273,6 +264,7 @@ class CASimulator:
         """
         Handle a single pygame event.
 
+        Route to active modal view. If no view is active, route to UIbar.
         Global events (QUIT, keyboard shortcuts) are handled directly.
         """
         if event.type == pygame.QUIT:
@@ -291,6 +283,7 @@ class CASimulator:
             return
 
     def _set_state(self, state: RunState):
+        print(f"Transitioning from {self.state.name} to {state.name}..")
         self.state = state
 
     def _initialize_pygame(self) -> None:
