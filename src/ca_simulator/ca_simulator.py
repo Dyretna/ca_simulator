@@ -141,6 +141,10 @@ class CASimulator:
             self._draw_ui_frame()
             self.clock.tick(self.fps)
 
+    # ------------------------------------------------------------------
+    # Public API - reached by Actions
+    # ------------------------------------------------------------------
+
     def play(self):
         """Plays next or resets the simulation"""
         self._set_state(RunState.RESET)
@@ -200,6 +204,36 @@ class CASimulator:
         pygame.display.set_mode(res, flags)
 
     # ------------------------------------------------------------------
+    # FLow Control
+    # ------------------------------------------------------------------
+
+    def _handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single pygame event.
+
+        Route to active modal view. If no view is active, route to UIbar.
+        Global events (QUIT, keyboard shortcuts) are handled directly.
+        """
+        if event.type == pygame.QUIT:
+            self.quit()
+            return
+
+        elif self.settings_screen.is_active():
+            self.settings_screen.handle_event(event)
+            return
+
+        elif self.colorpicker.is_active():
+            self.colorpicker.handle_event(event)
+
+        else:
+            self.ui_bar.handle_event(event)
+            return
+
+    def _set_state(self, state: RunState):
+        print(f"Transitioning from {self.state.name} to {state.name}..")
+        self.state = state
+
+    # ------------------------------------------------------------------
     # Render
     # ------------------------------------------------------------------
 
@@ -257,34 +291,8 @@ class CASimulator:
         self.screen.blit(text, (padding, padding // 2))
 
     # --------------------------------------------------------
-    # initialize, reset, save, set state
+    # Initialize, Reset, Save
     # --------------------------------------------------------
-
-    def _handle_event(self, event: pygame.event.Event) -> None:
-        """
-        Handle a single pygame event.
-
-        Route to active modal view. If no view is active, route to UIbar.
-        Global events (QUIT, keyboard shortcuts) are handled directly.
-        """
-        if event.type == pygame.QUIT:
-            self.quit()
-            return
-
-        elif self.settings_screen.is_active():
-            self.settings_screen.handle_event(event)
-            return
-
-        elif self.colorpicker.is_active():
-            self.colorpicker.handle_event(event)
-
-        else:
-            self.ui_bar.handle_event(event)
-            return
-
-    def _set_state(self, state: RunState):
-        print(f"Transitioning from {self.state.name} to {state.name}..")
-        self.state = state
 
     def _initialize_pygame(self) -> None:
         # recreate display
