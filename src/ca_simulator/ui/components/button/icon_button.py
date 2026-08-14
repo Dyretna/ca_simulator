@@ -2,8 +2,7 @@
 
 import pygame
 
-from pygame_automata.ui.theme import BTN_ACTIVE_C, BTN_HOVER_C
-
+from ....ui.theme import BTN_ACTIVE_C, BTN_HOVER_C
 from .base import ButtonBase
 
 

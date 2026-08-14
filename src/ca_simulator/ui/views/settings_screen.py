@@ -4,13 +4,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from pygame_automata.ui.theme import (
-    DEFAULT_FONT,
-    SETTINGS_PANEL_BG,
-    SETTINGS_TITLE_C,
-    TITLE_FONT,
-)
-
+from ...ui.theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
 from ..components import TextButton, TextButtonRow
 
 if TYPE_CHECKING:

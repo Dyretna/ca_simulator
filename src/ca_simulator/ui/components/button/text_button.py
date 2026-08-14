@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 import pygame
 
-from pygame_automata.ui.theme import (
+from ....ui.theme import (
     BTN_TEXT_C,
     DEFAULT_FONT,
     SETTINGS_BUTTON_ACTIVE,
@@ -10,7 +10,6 @@ from pygame_automata.ui.theme import (
     SETTINGS_BUTTON_HOVER,
     SETTINGS_ROW_LABEL_C,
 )
-
 from .base import ButtonBase
 
 
