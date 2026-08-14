@@ -1,21 +1,15 @@
-from typing import TYPE_CHECKING, Callable, Tuple
+from typing import Callable, Tuple
 
 import pygame
 
 from ..components import Slider, TextButton
 from ..theme import DEFAULT_FONT, SETTINGS_PANEL_BG, TITLE_FONT
 
-if TYPE_CHECKING:
-    from ...ca_simulator import CASimulator
-
-
 ColorTuple = Tuple[int, int, int, int]
 
 
 class ColorPicker:
-    def __init__(self, runner: "CASimulator"):
-        self.runner = runner
-        self.actions = runner.actions
+    def __init__(self):
         self.active: bool = False
 
         self.return_callback = None

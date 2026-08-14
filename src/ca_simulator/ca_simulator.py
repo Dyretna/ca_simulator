@@ -75,7 +75,7 @@ class CASimulator:
 
         self.actions = Actions(self)
         self.settings_screen = SettingsScreen(self)
-        self.colorpicker = ColorPicker(self)
+        self.colorpicker = ColorPicker()
         self.ui_bar = UIBar(self)
 
         self.save_flag = False
@@ -93,7 +93,7 @@ class CASimulator:
         print(f"Ruleset Bitsize: {self.config.engine.bit_size}")
         print(f"First Rule: {self.ruleset_code}")
 
-        # first draw before fullscreen
+        # first draw
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
         pygame.display.flip()
@@ -106,8 +106,8 @@ class CASimulator:
                 case RunState.RUNNING:
                     # SIMULATION runs unless settings or colorpicker is open
                     if (
-                        not self.settings_screen.is_active()
-                        and not self.colorpicker.is_active()
+                        not self.settings_is_active()
+                        and not self.colorpicker_is_active()
                     ):
                         # normal step
                         cells = self.engine.step()
@@ -176,12 +176,6 @@ class CASimulator:
         if not self.settings_is_active():
             self.settings_screen.show()
 
-    def close_settings(self) -> None:
-        """Hide the settings screen"""
-        if not self.settings_is_active():
-            return
-        self.settings_screen.hide()
-
     # --- ColorPicker ---
 
     def colorpicker_is_active(self):
@@ -190,11 +184,6 @@ class CASimulator:
     def open_colorpicker(self) -> None:
         if not self.colorpicker_is_active():
             self.colorpicker.show()
-
-    def close_colorpicker(self) -> None:
-        if not self.colorpicker_is_active():
-            return
-        self.colorpicker.hide()
 
     # toggle fullscreen
     def toggle_fullscreen(self) -> None:

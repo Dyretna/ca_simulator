@@ -86,7 +86,3 @@ class Actions:
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
         self.runner.open_settings()
-
-    def close_settings(self) -> None:
-        """Hide the settings screen"""
-        self.runner.close_settings()
