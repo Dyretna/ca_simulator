@@ -16,6 +16,7 @@ class DisplaySettings:
 class GeneralSettings:
     auto_run: bool = False
     show_info: bool = False
+    post_sim_pause_ms: int = 1000
 
 
 @dataclass
@@ -23,7 +24,6 @@ class EngineSettings:
     bit_size: int = 8
     cell_size: int = 3
     random_gen: bool = True
-    post_sim_pause_ms: int = 1000
 
 
 @dataclass

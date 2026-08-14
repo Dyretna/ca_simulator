@@ -65,6 +65,8 @@ class CASimulator:
         # timing
         self.clock = pygame.time.Clock()
         self.fps = 60
+        self.post_sim_pause_ms = self.config.general.post_sim_pause_ms
+        self.idle_end = 0
 
         # core engine
         self.ruleset_code: int = 30
@@ -121,28 +123,24 @@ class CASimulator:
 
                     # reset when full
                     if self.engine.simulation_done(self.config.display.height):
+                        self.idle_end = pygame.time.get_ticks() + self.post_sim_pause_ms
                         self._set_state(RunState.IDLE)
 
             elif self.state == RunState.IDLE:
-                end = pygame.time.get_ticks() + self.config.engine.post_sim_pause_ms
+                for event in pygame.event.get():
+                    self._handle_event(event)
+                if self.save_flag:
+                    self._save()
 
-                # autorun ON -> pause, then save, then reset
-                while pygame.time.get_ticks() < end:
-                    for event in pygame.event.get():
-                        self._handle_event(event)
-                    self._draw_ui_frame()
-                    self.clock.tick(self.fps)
-                    if self.save_flag:
-                        self._save()
-
-                if self.config.general.auto_run:
-                    self._set_state(RunState.RESET)
+                if pygame.time.get_ticks() >= self.idle_end:
+                    if self.config.general.auto_run:
+                        self._set_state(RunState.RESET)
 
             elif self.state == RunState.RESET:
                 self._reset_simulation()
                 self._set_state(RunState.RUNNING)
 
-            # draw ui and settings
+            # always draw UI and tick
             self._draw_ui_frame()
             self.clock.tick(self.fps)
 
