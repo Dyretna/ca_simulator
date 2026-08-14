@@ -9,15 +9,16 @@ The project builds on David Colson's original example:
 ```
 https://github.com/DavidColson/CellularAutomata
 ```
+
 The engine and application architecture have been rewritten in an modular OOP-style to support multiple rulesets, dynamic configuration, and a full Pygame-based UI.
----
+
 
 ## Installation
 
 ### 1. Clone the repository
 
 ```bash
-git clone git@github.com:Dyretna/pygame_automata.git
+git clone git@github.com:Dyretna/ca_simulator.git
 cd pygame_automata
 ```
 
@@ -35,7 +36,7 @@ located under src/pygame_automata.
 This project uses python-dotenv to get easy access to paths.  To make use of it, create a .env file and add path to project root folder:
 
 ```
-PROJECT_ROOT=/home/User/Dokument/<path to project...>/pygame_automata
+PROJECT_ROOT=/home/User/Dokument/<path to project...>/ca_simulator
 ```
 
 ## Usage
@@ -64,7 +65,7 @@ python run.py
 │   ...
 |
 ├── src
-│   └── pygame_automata
+│   └── ca_simulator
 │       ├── core
 │       │   ├── utils.py
 │       │   ├── __init__.py

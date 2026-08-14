@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pygame_automata"
+name = "ca_simulator"
 version = "0.1.0"
 description = "Cellular automata with Pygame interface"
 readme = "README.md"
@@ -37,7 +37,7 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Dyretna/pygame_automata"
+Repository = "https://github.com/Dyretna/ca_simulator"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

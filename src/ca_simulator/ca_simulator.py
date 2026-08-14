@@ -1,4 +1,4 @@
-# src/pygame_automata/ui/pygame_runner.py
+# src/pygame_automata/ca_simulator.py
 
 """
 Pygame-based runner for interactive 1D cellular automata simulations.
@@ -60,6 +60,7 @@ class CASimulator:
 
         # resolve paths
         self.config = Config()
+        self.state = RunState.INITIALIZATION
 
         # timing
         self.clock = pygame.time.Clock()
@@ -82,7 +83,6 @@ class CASimulator:
         self.settings_screen = SettingsScreen(self)
         self.colorpicker = ColorPicker(self)
         self.ui_bar = UIBar(self)
-        self.state = RunState.INITIALIZATION
 
         self.save_flag = False
         self.display_changes = False
