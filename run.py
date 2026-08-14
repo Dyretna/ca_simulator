@@ -1,6 +1,6 @@
-# run_pygame
+# run.py
 
-from ca_simulator import CASimulator
+from src.ca_simulator import CASimulator
 
 runner = CASimulator()
 

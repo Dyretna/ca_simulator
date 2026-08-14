@@ -13,32 +13,6 @@ https://github.com/DavidColson/CellularAutomata
 The engine and application architecture have been rewritten in an modular OOP-style to support multiple rulesets, dynamic configuration, and a full Pygame-based UI.
 
 
-## Installation
-
-### 1. Clone the repository
-
-```bash
-git clone git@github.com:Dyretna/ca_simulator.git
-cd pygame_automata
-```
-
-### 2. Install in editable mode
-Editable mode makes the package importable while you develop:
-
-```bash
-pip install -e .
-```
-
-This uses the pyproject.toml configuration and installs the package
-located under src/pygame_automata.
-
-### 3. Set path in .env
-This project uses python-dotenv to get easy access to paths.  To make use of it, create a .env file and add path to project root folder:
-
-```
-PROJECT_ROOT=/home/User/Dokument/<path to project...>/ca_simulator
-```
-
 ## Usage
 Run the pygame visualizer:
 
@@ -65,31 +39,37 @@ python run.py
 │   ...
 |
 ├── src
-│   └── ca_simulator
-│       ├── core
-│       │   ├── utils.py
-│       │   ├── __init__.py
-│       │   ├── ca_engine.py
-│       │   └── rules.py
-│       ├── ui
-│       │   ├── views
-│       │   │   ├── ca_screen.py
-│       │   │   ├── __init__.py
-│       │   │   ├── settings_screen.py
-│       │   │   └── ui_bar.py
-│       │   ├── button
-│       │   │   ├── base.py
-│       │   │   ├── icon_button.py
-│       │   │   ├── __init__.py
-│       │   │   └── text_button.py
-│       │   ├── theme.py
-│       │   ├── controller.py
-│       │   └── __init__.py
-│       ├── pygame_runner.py
-│       └── config.py
+│   └── ca_simulator
+│       ├── core
+│       │   ├── __init__.py
+│       │   ├── ca_engine.py
+│       │   ├── rules.py
+│       │   └── utils.py
+│       ├── ui
+│       │   ├── components
+│       │   │   ├── button
+│       │   │   │   ├── __init__.py
+│       │   │   │   ├── base.py
+│       │   │   │   ├── color_swatch_button.py
+│       │   │   │   ├── icon_button.py
+│       │   │   │   └── text_button.py
+│       │   │   ├── __init__.py
+│       │   │   └── slider.py
+│       │   ├── views
+│       │   │   ├── __init__.py
+│       │   │   ├── colorpicker.py
+│       │   │   ├── settings_screen.py
+│       │   │   └── ui_bar.py
+│       │   ├── __init__.py
+│       │   ├── actions.py
+│       │   └── theme.py
+│       ├──__init__.py
+│       ├── ca_simulator.py
+│       └── config.py
 ├── LICENSE
-├── README.md
-├── run.py
 ├── pyproject.toml
-└── requirements.txt
+├── README.md
+├── requirements.txt
+└── run.py
+
 ```
