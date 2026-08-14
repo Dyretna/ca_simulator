@@ -65,7 +65,7 @@ class CASimulator:
         # timing
         self.clock = pygame.time.Clock()
         self.fps = 60
-        self.post_sim_pause_ms = self.config.general.post_sim_pause_ms
+        self.idle_pause_ms = self.config.general.idle_pause_ms
         self.idle_end = 0
 
         # core engine
@@ -121,11 +121,12 @@ class CASimulator:
                     cells = self.engine.step()
                     self._step(cells)
 
-                    # reset when full
+                    # set State to idle
                     if self.engine.simulation_done(self.config.display.height):
-                        self.idle_end = pygame.time.get_ticks() + self.post_sim_pause_ms
+                        self.idle_end = pygame.time.get_ticks() + self.idle_pause_ms
                         self._set_state(RunState.IDLE)
 
+            # If Autorun is active, set to reset after short break
             elif self.state == RunState.IDLE:
                 for event in pygame.event.get():
                     self._handle_event(event)
