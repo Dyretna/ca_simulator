@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from ..pygame_runner import PygameRunner
 
 
 ColorTuple = Tuple[int, int, int, int]

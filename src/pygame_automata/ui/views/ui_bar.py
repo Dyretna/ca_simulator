@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from pygame_automata.ui.components import ButtonBase, ColorSwatchButton, IconButton
-from pygame_automata.ui.theme import UI_BAR_ALPHA, UI_BAR_BG
+from ..components import ButtonBase, ColorSwatchButton, IconButton
+from ..theme import UI_BAR_ALPHA, UI_BAR_BG
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from ...pygame_runner import PygameRunner
 
 
 class UIBar:

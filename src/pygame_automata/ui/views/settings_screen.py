@@ -14,7 +14,7 @@ from pygame_automata.ui.theme import (
 from ..components import TextButton, TextButtonRow
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from ...pygame_runner import PygameRunner
 
 
 class SettingsScreen:

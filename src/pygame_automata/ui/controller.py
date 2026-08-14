@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from ..pygame_runner import PygameRunner
 
 
 class Controller:

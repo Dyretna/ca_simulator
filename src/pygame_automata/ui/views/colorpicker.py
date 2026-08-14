@@ -6,7 +6,7 @@ from ..components import Slider, TextButton
 from ..theme import DEFAULT_FONT, SETTINGS_PANEL_BG, TITLE_FONT
 
 if TYPE_CHECKING:
-    from pygame_automata.pygame_runner import PygameRunner
+    from ...pygame_runner import PygameRunner
 
 
 ColorTuple = Tuple[int, int, int, int]

@@ -24,14 +24,14 @@ import os
 
 import pygame
 
-from pygame_automata.config import Config
-from pygame_automata.core.ca_engine import CAEngine
-from pygame_automata.ui.actions import Actions
-from pygame_automata.ui.controller import Controller
-from pygame_automata.ui.theme import DEFAULT_FONT
-from pygame_automata.ui.views.colorpicker import ColorPicker
-from pygame_automata.ui.views.settings_screen import SettingsScreen
-from pygame_automata.ui.views.ui_bar import UIBar
+from .config import Config
+from .core.ca_engine import CAEngine
+from .ui.actions import Actions
+from .ui.controller import Controller
+from .ui.theme import DEFAULT_FONT
+from .ui.views.colorpicker import ColorPicker
+from .ui.views.settings_screen import SettingsScreen
+from .ui.views.ui_bar import UIBar
 
 
 class PygameRunner:
