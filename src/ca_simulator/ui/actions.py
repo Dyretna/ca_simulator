@@ -60,14 +60,6 @@ class Actions:
         self.config.engine.random_gen = not self.config.engine.random_gen
         self.update_settings()
 
-    def set_fg_color(self, c: ColorTuple) -> None:
-        self.config.colors.ca_fg_color = (c[0], c[1], c[2], c[3])
-        self.update_settings()
-
-    def set_bg_color(self, c: ColorTuple) -> None:
-        self.config.colors.ca_bg_color = (c[0], c[1], c[2], c[3])
-        self.update_settings()
-
     # --- play and stop ---
 
     def play(self):
@@ -92,16 +84,24 @@ class Actions:
         if not self.settings_is_active():
             self.runner.settings_screen.show()
 
-    # --- Open Colorpickers, for FG / BG ---
+    # --- Colorpicker ---
+
+    def set_fg_color(self, c: ColorTuple) -> None:
+        self.config.colors.ca_fg_color = (c[0], c[1], c[2], c[3])
+        self.update_settings()
+
+    def set_bg_color(self, c: ColorTuple) -> None:
+        self.config.colors.ca_bg_color = (c[0], c[1], c[2], c[3])
+        self.update_settings()
 
     def open_fg_picker(self):
         self.runner.colorpicker.show(
-            input_color=self.runner.config.colors.ca_fg_color,
+            input_color=self.config.colors.ca_fg_color,
             callback=self.set_fg_color,
         )
 
     def open_bg_picker(self):
         self.runner.colorpicker.show(
-            input_color=self.runner.config.colors.ca_bg_color,
+            input_color=self.config.colors.ca_bg_color,
             callback=self.set_bg_color,
         )
