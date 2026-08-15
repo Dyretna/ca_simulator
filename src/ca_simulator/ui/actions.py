@@ -37,6 +37,10 @@ class Actions:
     def set_info(self, inf):
         self.config.general.show_info = inf
 
+    @property
+    def save_flag(self):
+        return self.runner.save_flag
+
     # --- Toggles ---
     def toggle_save(self) -> None:
         "Save when CA simulation is done"
@@ -86,3 +90,17 @@ class Actions:
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
         self.runner.open_settings()
+
+    # --- Open Colorpickers, for FG / BG ---
+
+    def open_fg_picker(self):
+        self.runner.colorpicker.show(
+            input_color=self.runner.config.colors.ca_fg_color,
+            callback=self.set_fg_color,
+        )
+
+    def open_bg_picker(self):
+        self.runner.colorpicker.show(
+            input_color=self.runner.config.colors.ca_bg_color,
+            callback=self.set_bg_color,
+        )

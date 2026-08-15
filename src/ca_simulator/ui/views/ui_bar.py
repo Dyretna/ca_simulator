@@ -1,21 +1,17 @@
 # src/pygame_automata/ui/pygame_ui/views/ui_bar.py
 
-from typing import TYPE_CHECKING
-
 import pygame
 
+from ...config import Config
+from ..actions import Actions
 from ..components import ButtonBase, ColorSwatchButton, IconButton
 from ..theme import UI_BAR_ALPHA, UI_BAR_BG
 
-if TYPE_CHECKING:
-    from ...ca_simulator import CASimulator
-
 
 class UIBar:
-    def __init__(self, runner: "CASimulator"):
-        self.runner = runner
-        self.config = self.runner.config
-        self.actions = self.runner.actions
+    def __init__(self, config: Config, actions: Actions):
+        self.config = config
+        self.actions = actions
 
         # UI bar surface
         self.width = self.config.display.width
@@ -110,22 +106,6 @@ class UIBar:
             self.actions.toggle_save()
 
     # ------------------------------------------------------------------
-    # callbacks
-    # ------------------------------------------------------------------
-
-    def _open_fg_picker(self):
-        self.runner.colorpicker.show(
-            input_color=self.config.colors.ca_fg_color,
-            callback=self.actions.set_fg_color,
-        )
-
-    def _open_bg_picker(self):
-        self.runner.colorpicker.show(
-            input_color=self.config.colors.ca_bg_color,
-            callback=self.actions.set_bg_color,
-        )
-
-    # ------------------------------------------------------------------
     # Button construction
     # ------------------------------------------------------------------
     def _build_icon_buttons(self):
@@ -180,7 +160,7 @@ class UIBar:
             "icon_save.png",
             start,
             self.actions.toggle_save,
-            active=lambda: self.runner.save_flag,
+            active=lambda: self.actions.save_flag,
         )
 
         start += 60
@@ -198,7 +178,7 @@ class UIBar:
             *pos,
             get_color=lambda: self.config.colors.ca_fg_color,
             icon_path=icon_path,
-            callback=self._open_fg_picker,
+            callback=self.actions.open_fg_picker,
         )
 
         pos = (start + 60, 10, 50, 40)
@@ -206,7 +186,7 @@ class UIBar:
             *pos,
             get_color=lambda: self.config.colors.ca_bg_color,
             icon_path=icon_path,
-            callback=self._open_bg_picker,
+            callback=self.actions.open_bg_picker,
         )
 
         self.buttons.append(fg_btn)

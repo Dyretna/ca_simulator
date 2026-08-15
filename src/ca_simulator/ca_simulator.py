@@ -74,9 +74,9 @@ class CASimulator:
         self._initialize_pygame()
 
         self.actions = Actions(self)
-        self.settings_screen = SettingsScreen(self)
+        self.settings_screen = SettingsScreen(self.config, self.actions)
+        self.ui_bar = UIBar(self.config, self.actions)
         self.colorpicker = ColorPicker()
-        self.ui_bar = UIBar(self)
 
         self.save_flag = False
         self.display_changes = False

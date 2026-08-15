@@ -1,20 +1,18 @@
 # src/pygame_automata/ui/pygame_ui/views/settings_screen.py
 
-from typing import TYPE_CHECKING
 
 import pygame
 
+from ...config import Config
 from ...ui.theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
+from ..actions import Actions
 from ..components import TextButton, TextButtonRow
-
-if TYPE_CHECKING:
-    from ...ca_simulator import CASimulator
 
 
 class SettingsScreen:
-    def __init__(self, runner: "CASimulator"):
-        self.config = runner.config
-        self.actions = runner.actions
+    def __init__(self, config: Config, actions: Actions):
+        self.config = config
+        self.actions = actions
         self.active = False
 
         # fonts
