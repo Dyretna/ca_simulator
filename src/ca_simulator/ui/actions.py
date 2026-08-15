@@ -89,7 +89,8 @@ class Actions:
 
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
-        self.runner.open_settings()
+        if not self.settings_is_active():
+            self.runner.settings_screen.show()
 
     # --- Open Colorpickers, for FG / BG ---
 

@@ -172,19 +172,10 @@ class CASimulator:
     def settings_is_active(self):
         return self.settings_screen.is_active()
 
-    def open_settings(self) -> None:
-        """Show the settings screen as a modal view."""
-        if not self.settings_is_active():
-            self.settings_screen.show()
-
     # --- ColorPicker ---
 
     def colorpicker_is_active(self):
         return self.colorpicker.is_active()
-
-    def open_colorpicker(self) -> None:
-        if not self.colorpicker_is_active():
-            self.colorpicker.show()
 
     # toggle fullscreen
     def toggle_fullscreen(self) -> None:
