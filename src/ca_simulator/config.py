@@ -34,7 +34,7 @@ class ColorSettings:
 
 @dataclass
 class PathsSettings:
-    project_root: Path = Path(os.getenv("PROJECT_ROOT", Path.cwd()))
+    project_root: Path = Path.cwd()
     output_dir: Path = field(init=False)
     assets_dir: Path = field(init=False)
 

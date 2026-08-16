@@ -3,12 +3,12 @@ from typing import Callable, Optional
 import pygame
 
 from ....ui.theme import (
-    BTN_TEXT_C,
+    BTN_ACTIVE_C,
+    BTN_HOVER_C,
+    BTN_INACTIVE_C,
     DEFAULT_FONT,
-    SETTINGS_BUTTON_ACTIVE,
-    SETTINGS_BUTTON_BG,
-    SETTINGS_BUTTON_HOVER,
-    SETTINGS_ROW_LABEL_C,
+    TEXT_ACTIVE,
+    TEXT_INACTIVE,
 )
 from .base import ButtonBase
 
@@ -29,28 +29,38 @@ class TextButton(ButtonBase):
         self.text = text
         self.font = font
 
-        self.bg = SETTINGS_BUTTON_BG
-        self.hover_color = SETTINGS_BUTTON_HOVER
-        self.active_color = SETTINGS_BUTTON_ACTIVE
-        self.text_color = BTN_TEXT_C
+        self.hover_c = BTN_HOVER_C
+        self.active_btn_c = BTN_ACTIVE_C
+        self.inactive_btn_c = BTN_INACTIVE_C
+
+        self.active_text_c = TEXT_ACTIVE
+        self.inactive_text_c = TEXT_INACTIVE
 
         self.active = active
 
+        # initial text cover
+        self.text_color = self.active_text_c if self.active else self.inactive_text_c
         self.text_surf = self.font.render(self.text, True, self.text_color)
+
         self.text_x = x + (w - self.text_surf.get_width()) // 2
         self.text_y = y + (h - self.text_surf.get_height()) // 2
 
-    def draw(self, surface):
-        rect = pygame.Rect(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
-
+    def draw(self, surface: pygame.Surface):
         if self.active:
-            color = self.active_color
-        elif self.hover:
-            color = self.hover_color
-        else:
-            color = self.bg
+            btn_color = self.active_btn_c
+            text_color = self.active_text_c
 
-        pygame.draw.rect(surface, color, rect, border_radius=6)
+        elif self.hover:
+            btn_color = self.hover_c
+            text_color = self.inactive_text_c
+        else:
+            btn_color = self.inactive_btn_c
+            text_color = self.inactive_text_c
+
+        self.text_surf = self.font.render(self.text, True, text_color)
+
+        rect = pygame.Rect(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
+        pygame.draw.rect(surface, btn_color, rect, border_radius=6)
         surface.blit(self.text_surf, (self.text_x, self.text_y))
 
     def on_mouse_move(self, local_pos):
@@ -82,7 +92,7 @@ class TextButtonRow:
 
     def draw(self, panel: pygame.Surface):
         # label
-        label_surf = self.font.render(self.label, True, SETTINGS_ROW_LABEL_C)
+        label_surf = self.font.render(self.label, True, TEXT_ACTIVE)
         panel.blit(label_surf, (20, self.y))
 
         # draw buttons horizontally

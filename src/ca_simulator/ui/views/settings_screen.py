@@ -1,6 +1,5 @@
 # src/pygame_automata/ui/pygame_ui/views/settings_screen.py
 
-
 import pygame
 
 from ...config import Config

@@ -3,29 +3,28 @@
 """
 Default theme constants.
 """
-
-# UI bar
-UI_BAR_BG = (20, 30, 40)
-UI_BAR_ALPHA = 210
+# ---------------------------------------------------
+# COLORS
+# ---------------------------------------------------
 
 # Buttons
-BTN_HOVER_C = (60, 60, 90)
-BTN_ACTIVE_C = (120, 120, 90)
-BTN_TEXT_C = (200, 200, 200)
+BTN_HOVER_C = (80, 110, 150)
+BTN_ACTIVE_C = (80, 100, 120)
+BTN_INACTIVE_C = (40, 50, 60)
 
 # Settings screen
 SETTINGS_PANEL_BG = (30, 40, 50, 230)
 SETTINGS_TITLE_C = (230, 230, 230)
-SETTINGS_ROW_LABEL_C = (200, 200, 200)
 
-# Settings buttons
-SETTINGS_BUTTON_BG = (40, 50, 60)
-SETTINGS_BUTTON_HOVER = (80, 110, 150)
-SETTINGS_BUTTON_ACTIVE = (80, 100, 120)
+# text colors
+TEXT_ACTIVE = (200, 200, 200)
+TEXT_INACTIVE = (100, 100, 100)
 
-# Spacing tokens
-PADDING = 10
-RADIUS = 4
+# UI bar and Icons
+UI_BAR_BG = (20, 30, 40)
+UI_BAR_ALPHA = 210
+ICON_HOVER = BTN_HOVER_C
+ICON_ACTIVE = TEXT_ACTIVE
 
 # ---------------------------------------------------
 # FONTS

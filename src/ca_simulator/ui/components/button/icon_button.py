@@ -2,7 +2,7 @@
 
 import pygame
 
-from ....ui.theme import BTN_ACTIVE_C, BTN_HOVER_C
+from ....ui.theme import ICON_ACTIVE, ICON_HOVER
 from .base import ButtonBase
 
 
@@ -42,9 +42,9 @@ class IconButton(ButtonBase):
         is_active = self.active() if self.active else False
 
         if is_active:
-            pygame.draw.circle(surface, BTN_ACTIVE_C, (self.cx, cy), self.radius)
+            pygame.draw.circle(surface, ICON_ACTIVE, (self.cx, cy), self.radius)
         elif self.hover:
-            pygame.draw.circle(surface, BTN_HOVER_C, (self.cx, cy), self.radius)
+            pygame.draw.circle(surface, ICON_HOVER, (self.cx, cy), self.radius)
 
         img = self.icon_img
         x = self.cx - img.get_width() // 2
