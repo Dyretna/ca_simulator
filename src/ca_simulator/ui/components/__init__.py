@@ -1,7 +1,8 @@
 from .button.base import ButtonBase
 from .button.color_swatch_button import ColorSwatchButton
 from .button.icon_button import IconButton
-from .button.text_button import TextButton, TextButtonRow
+from .button.text_button import TextButton
+from .settings_components import SettingsColumn, TextButtonRow
 from .slider import Slider
 
 __all__ = [
@@ -9,6 +10,7 @@ __all__ = [
     "ColorSwatchButton",
     "IconButton",
     "TextButton",
+    "SettingsColumn",
     "TextButtonRow",
     "Slider",
 ]

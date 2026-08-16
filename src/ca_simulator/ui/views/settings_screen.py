@@ -5,7 +5,7 @@ import pygame
 from ...config import Config
 from ...ui.theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
 from ..actions import Actions
-from ..components import TextButton, TextButtonRow
+from ..components import SettingsColumn, TextButton
 
 
 class SettingsScreen:
@@ -14,12 +14,15 @@ class SettingsScreen:
         self.actions = actions
         self.active = False
 
-        # fonts
         self.font = pygame.font.SysFont(**DEFAULT_FONT)
         self.title_font = pygame.font.SysFont(**TITLE_FONT)
 
-        # rows
-        self.rows = []
+        self.column: SettingsColumn = None
+        self.settings_panel = None
+        self.panel_x = 0
+        self.panel_y = 0
+        self.panel_w = 0
+        self.panel_h = 0
 
     # ------------------------------------------------------------
     # Public API
@@ -28,7 +31,7 @@ class SettingsScreen:
         """Activate settings screen."""
         self.active = True
         self._build_panel()
-        self._build_rows()
+        self.column = self._build_column()
         self._build_apply_btn()
         self._build_cancel_btn()
 
@@ -51,8 +54,7 @@ class SettingsScreen:
             # translate positions from global to local
             local_pos = (event.pos[0] - self.panel_x, event.pos[1] - self.panel_y)
 
-            for row in self.rows:
-                row.handle_mouse_move(local_pos)
+            self.column.handle_mouse_move(local_pos)
 
             self.apply_button.on_mouse_move(event.pos)
             self.cancel_button.on_mouse_move(event.pos)
@@ -61,8 +63,7 @@ class SettingsScreen:
             # translate positions from global to local
             local_pos = (event.pos[0] - self.panel_x, event.pos[1] - self.panel_y)
 
-            for row in self.rows:
-                row.handle_mouse_down(local_pos)
+            self.column.handle_mouse_down(local_pos)
 
             self.apply_button.on_mouse_down(event.pos)
             self.cancel_button.on_mouse_down(event.pos)
@@ -85,8 +86,7 @@ class SettingsScreen:
         self.settings_panel.blit(title, (20, 20))
 
         # Draw options row
-        for row in self.rows:
-            row.draw(self.settings_panel)
+        self.column.draw(self.settings_panel)
 
         # blit panel
         surface.blit(self.settings_panel, (self.panel_x, self.panel_y))
@@ -111,74 +111,61 @@ class SettingsScreen:
         )
         self.settings_panel.fill(SETTINGS_PANEL_BG)
 
-    def _build_rows(self):
-        """Create ButtonRow objects for each setting."""
+    def _build_column(self):
+        """Create TextButtonRow objects for each setting."""
+        col = SettingsColumn(padding=80, row_height=40)
 
-        padding = 80
-        row_size = 40
+        col.add_row(
+            "Resolution",
+            [(1280, 720), (1920, 1080)],
+            lambda v: self.actions.set_resolution(*v),
+            lambda v: v[0] == self.config.display.width
+            and v[1] == self.config.display.height,
+        )
 
-        res_row = TextButtonRow(padding, padding, "Resolution")
-        for w, h in [(1280, 720), (1920, 1080)]:
-            active = w == self.config.display.width and h == self.config.display.height
-            res_row.add(
-                f"{w}x{h}",
-                lambda w=w, h=h: self.actions.set_resolution(w, h),
-                active,
-            )
+        col.add_row(
+            "Fullscreen",
+            [True, False],
+            lambda v: self.actions.set_fullscreen(v),
+            lambda v: self.config.display.fullscreen == v,
+        )
 
-        y = row_size
-        fs_row = TextButtonRow(padding, padding + y, "Fullscreen")
-        for fs in [True, False]:
-            active = self.config.display.fullscreen == fs
-            fs_row.add(
-                "ON" if fs else "OFF",
-                lambda fs=fs: self.actions.set_fullscreen(fs),
-                active,
-            )
+        col.add_row(
+            "Ruleset Size",
+            [8, 16, 32, 64],
+            lambda v: self.actions.set_ruleset(v),
+            lambda v: self.config.engine.bit_size == v,
+        )
 
-        y += row_size
-        rss_row = TextButtonRow(padding, padding + y, "Ruleset Size")
-        for b in [8, 16, 32, 64]:
-            active = self.config.engine.bit_size == b
-            rss_row.add(str(b), lambda b=b: self.actions.set_ruleset(b), active)
+        col.add_row(
+            "Cell Size",
+            list(range(1, 11)),
+            lambda v: self.actions.set_cellsize(v),
+            lambda v: self.config.engine.cell_size == v,
+        )
 
-        y += row_size
-        cs_row = TextButtonRow(padding, padding + y, "Cell Size")
-        for cs in list(range(1, 11)):
-            active = self.config.engine.cell_size == cs
-            cs_row.add(str(cs), lambda cs=cs: self.actions.set_cellsize(cs), active)
+        col.add_row(
+            "Random Mode",
+            [True, False],
+            lambda v: self.actions.set_random_mode(v),
+            lambda v: self.config.engine.random_gen == v,
+        )
 
-        y += row_size
-        mode_row = TextButtonRow(padding, padding + y, "Random Mode")
-        for mode in [True, False]:
-            active = self.config.engine.random_gen == mode
-            mode_row.add(
-                "ON" if mode else "OFF",
-                lambda mode=mode: self.actions.set_random_mode(mode),
-                active,
-            )
+        col.add_row(
+            "AutoRun",
+            [True, False],
+            lambda v: self.actions.set_autorun(v),
+            lambda v: self.config.general.auto_run == v,
+        )
 
-        y += row_size
-        ar_row = TextButtonRow(padding, padding + y, "AutoRun")
-        for ar in [True, False]:
-            active = self.config.general.auto_run == ar
-            ar_row.add(
-                "ON" if ar else "OFF",
-                lambda ar=ar: self.actions.set_autorun(ar),
-                active,
-            )
+        col.add_row(
+            "Info Overlay",
+            [True, False],
+            lambda v: self.actions.set_info(v),
+            lambda v: self.config.general.show_info == v,
+        )
 
-        y += row_size
-        info_row = TextButtonRow(padding, padding + y, "Info Overlay")
-        for inf in [True, False]:
-            active = self.config.general.show_info == inf
-            info_row.add(
-                "ON" if inf else "OFF",
-                lambda inf=inf: self.actions.set_info(inf),
-                active,
-            )
-
-        self.rows = [res_row, fs_row, rss_row, cs_row, mode_row, ar_row, info_row]
+        return col
 
     def _build_apply_btn(self):
         btn_y = self.panel_y + self.panel_h - 60

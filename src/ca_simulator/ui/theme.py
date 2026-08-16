@@ -18,7 +18,7 @@ SETTINGS_TITLE_C = (230, 230, 230)
 
 # text colors
 TEXT_ACTIVE = (200, 200, 200)
-TEXT_INACTIVE = (100, 100, 100)
+TEXT_INACTIVE = (150, 150, 150)
 
 # UI bar and Icons
 UI_BAR_BG = (20, 30, 40)

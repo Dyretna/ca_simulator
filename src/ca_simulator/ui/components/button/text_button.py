@@ -6,7 +6,6 @@ from ....ui.theme import (
     BTN_ACTIVE_C,
     BTN_HOVER_C,
     BTN_INACTIVE_C,
-    DEFAULT_FONT,
     TEXT_ACTIVE,
     TEXT_INACTIVE,
 )
@@ -52,7 +51,7 @@ class TextButton(ButtonBase):
 
         elif self.hover:
             btn_color = self.hover_c
-            text_color = self.inactive_text_c
+            text_color = self.active_text_c
         else:
             btn_color = self.inactive_btn_c
             text_color = self.inactive_text_c
@@ -69,60 +68,3 @@ class TextButton(ButtonBase):
     def on_mouse_down(self, local_pos):
         if self.rect.collidepoint(local_pos):
             self.callback()
-
-
-# ------------------------------------------------------------
-# TextButtonRow: simple row with label + TextButtons
-# ------------------------------------------------------------
-class TextButtonRow:
-    def __init__(self, x: int, y: int, label: str):
-        self.x = x
-        self.y = y
-        self.label = label
-        self.buttons: list[TextButton] = []
-        self.font = pygame.font.SysFont(**DEFAULT_FONT)
-        self.label_offset = 200
-
-    def add(self, text: str, callback: Callable, active: bool):
-        # width based on pixel width of text
-        width = self.font.size(text)[0] + 10
-        height = self.font.size(text)[1] + 5
-        btn = TextButton(0, 0, width, height, text, self.font, callback, active)
-        self.buttons.append(btn)
-
-    def draw(self, panel: pygame.Surface):
-        # label
-        label_surf = self.font.render(self.label, True, TEXT_ACTIVE)
-        panel.blit(label_surf, (20, self.y))
-
-        # draw buttons horizontally
-        x = self.x + self.label_offset
-        for btn in self.buttons:
-            # set pos in panel
-            btn.rect.x = x
-            btn.rect.y = self.y
-
-            # center text in button
-            btn.text_x = btn.rect.x + (btn.rect.w - btn.text_surf.get_width()) // 2
-            btn.text_y = btn.rect.y + (btn.rect.h - btn.text_surf.get_height()) // 2
-
-            # draw on panel
-            btn.draw(panel)
-
-            # next butt assumes position
-            x += btn.rect.w + 10
-
-    def handle_mouse_move(self, pos):
-        for btn in self.buttons:
-            btn.on_mouse_move(pos)
-
-    def handle_mouse_down(self, pos):
-        for btn in self.buttons:
-            if btn.rect.collidepoint(pos):
-                btn.active = True
-
-                for other in self.buttons:
-                    if other is not btn:
-                        other.active = False
-
-            btn.on_mouse_down(pos)
