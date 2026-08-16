@@ -1,3 +1,5 @@
+from typing import Callable
+
 import pygame
 
 from ..theme import SETTINGS_PANEL_BG
@@ -5,7 +7,9 @@ from .settings_components import TextButton
 
 
 class UIPanel:
-    def __init__(self, width_ratio=0.6, height_ratio=0.6, padding=60):
+    def __init__(
+        self, width_ratio: float = 0.6, height_ratio: float = 0.6, padding: int = 60
+    ):
         w, h = pygame.display.get_window_size()
         self.w = int(w * width_ratio)
         self.h = int(h * height_ratio)
@@ -16,7 +20,9 @@ class UIPanel:
         self.surface = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         self.surface.fill(SETTINGS_PANEL_BG)
 
-    def place_bottom_buttons(self, font, apply_cb, cancel_cb):
+    def place_bottom_buttons(
+        self, font: pygame.font.Font, apply_cb: Callable, cancel_cb: Callable
+    ) -> None:
         btn_w = 100
         btn_h = 40
         spacing = 20
