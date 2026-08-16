@@ -2,7 +2,7 @@ from typing import Callable, Tuple
 
 import pygame
 
-from ..components import Slider, TextButton
+from ..components import Slider, UIPanel
 from ..theme import DEFAULT_FONT, SETTINGS_PANEL_BG, TITLE_FONT
 
 ColorTuple = Tuple[int, int, int, int]
@@ -14,6 +14,9 @@ class ColorPicker:
 
         self.return_callback = None
         self.color = pygame.Color(0, 0, 0, 255)
+
+        # panel
+        self.panel = UIPanel(width_ratio=0.5, height_ratio=0.35)
 
         # sliders
         self.rs = Slider(0, 255, 510)
@@ -27,17 +30,6 @@ class ColorPicker:
         # fonts
         self.font = pygame.font.SysFont(**DEFAULT_FONT)
         self.title_font = pygame.font.SysFont(**TITLE_FONT)
-
-        # buttons
-        self.buttons: list[TextButton] = []
-        self.apply_button: TextButton | None = None
-        self.cancel_button: TextButton | None = None
-        self.btn_w: int = 100
-        self.btn_h: int = 40
-        self.spacing: int = 20
-
-        # set elements
-        self.padding = 50
 
     # --------------------------------------------------------------
     # Public API
@@ -54,6 +46,8 @@ class ColorPicker:
         self.active = True
         self.return_callback = callback
 
+        self.panel.place_bottom_buttons(self.font, self._apply_changes, self.hide)
+
         c = self.tuple_to_color(input_color)
         self.c = c
 
@@ -69,12 +63,8 @@ class ColorPicker:
 
         # update color
         self._update_color()
-
-        self._build_panel()
         self._build_sliders()
-        self._build_color_rect(self.padding + 10)
-        self._build_apply_btn()
-        self._build_cancel_btn()
+        self._build_color_rect()
 
     def hide(self):
         """Deactivate colorpicker screen."""
@@ -98,24 +88,16 @@ class ColorPicker:
         ):
             return
 
-        cp_local_x = event.pos[0] - self.surf_rect.x
-        cp_local_y = event.pos[1] - self.surf_rect.y
-
-        # Sliders gets all events
         for slider in self.sliders:
-            lx = cp_local_x - slider.rect.x
-            ly = cp_local_y - slider.rect.y
-            slider.handle_event(event, lx, ly)
+            slider.handle_event(event)
 
-        # buttons: hover
         if event.type == pygame.MOUSEMOTION:
-            self.apply_button.on_mouse_move((cp_local_x, cp_local_y))
-            self.cancel_button.on_mouse_move((cp_local_x, cp_local_y))
+            self.panel.apply_button.on_mouse_move(event.pos)
+            self.panel.cancel_button.on_mouse_move(event.pos)
 
-        # buttons: click
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.apply_button.on_mouse_down((cp_local_x, cp_local_y))
-            self.cancel_button.on_mouse_down((cp_local_x, cp_local_y))
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.panel.apply_button.on_mouse_down(event.pos)
+            self.panel.cancel_button.on_mouse_down(event.pos)
 
     def draw(self, surface: pygame.Surface) -> None:
         if not self.active:
@@ -127,88 +109,52 @@ class ColorPicker:
         overlay.fill((0, 0, 0, 160))
         surface.blit(overlay, (0, 0))
 
-        self.cp_panel.fill(SETTINGS_PANEL_BG)
+        self.panel.surface.fill(SETTINGS_PANEL_BG)
+
+        # color preview
         self._update_color()
-
         rgb = (self.color.r, self.color.g, self.color.b)
-        pygame.draw.rect(self.cp_panel, rgb, self.color_rect, border_radius=10)
+        pygame.draw.rect(self.panel.surface, rgb, self.color_rect, border_radius=10)
         pygame.draw.rect(
-            self.cp_panel, (0, 0, 0), self.color_rect, width=3, border_radius=10
+            self.panel.surface, (0, 0, 0), self.color_rect, width=3, border_radius=10
         )
+        # blit
+        surface.blit(self.panel.surface, (self.panel.x, self.panel.y))
 
-        [slider.draw(self.cp_panel) for slider in self.sliders]
+        # sliders and buttons last
+        for slider in self.sliders:
+            slider.draw(surface)
 
-        self.apply_button.draw(self.cp_panel)
-        self.cancel_button.draw(self.cp_panel)
-
-        screen_rect = surface.get_rect()
-        self.surf_rect.center = screen_rect.center
-        surface.blit(self.cp_panel, self.surf_rect)
+        self.panel.apply_button.draw(surface)
+        self.panel.cancel_button.draw(surface)
 
     # --------------------------------------------------------------
-    # private helpers
+    # helpers
     # --------------------------------------------------------------
-
-    def _build_panel(self):
-        """Compute panel geometry."""
-        w, h = pygame.display.get_window_size()
-        self.panel_w = int(900)
-        self.panel_h = int(350)
-        self.panel_x = (w - self.panel_w) // 2
-        self.panel_y = (h - self.panel_h) // 2
-
-        self.cp_panel = pygame.Surface((self.panel_w, self.panel_h), pygame.SRCALPHA)
-        self.surf_rect = self.cp_panel.get_rect()
-        self.cp_panel.fill(SETTINGS_PANEL_BG)
 
     def _build_sliders(self):
         y_inc = 70
-        self.rs.rect.topleft = (self.padding, self.padding)
-        self.gs.rect.topleft = (self.padding, self.padding + y_inc)
-        self.bs.rect.topleft = (self.padding, self.padding + y_inc * 2)
+        p = self.panel.padding
+        self.rs.rect.topleft = (self.panel.x + p, self.panel.y + p)
+        self.gs.rect.topleft = (self.panel.x + p, self.panel.y + p + y_inc)
+        self.bs.rect.topleft = (self.panel.x + p, self.panel.y + p + y_inc * 2)
 
-    def _build_color_rect(self, padding: int):
+    def _build_color_rect(self):
+        p = self.panel.padding
         width = 160
-        left = self.surf_rect.width - (width + padding)
-        top = padding
+        panel_rect = self.panel.surface.get_rect()
+        left = panel_rect.width - (width + p)
+        top = p
         self.color_rect.update(left, top, width, width)
-
-    def _build_apply_btn(self):
-        x_apply: int = self.panel_w - self.padding - self.btn_w * 2 - self.spacing
-        y_btn: int = self.panel_h - self.padding - self.btn_h
-
-        self.apply_button = TextButton(
-            x_apply,
-            y_btn,
-            self.btn_w,
-            self.btn_h,
-            "Apply",
-            self.font,
-            self._apply_changes,
-        )
-
-    def _build_cancel_btn(self):
-        x_cancel: int = self.panel_w - self.padding - self.btn_w
-        y_btn: int = self.panel_h - self.padding - self.btn_h
-
-        self.cancel_button = TextButton(
-            x_cancel,
-            y_btn,
-            self.btn_w,
-            self.btn_h,
-            "Cancel",
-            self.font,
-            self.hide,
-        )
-
-    def _apply_changes(self) -> None:
-        if self.return_callback:
-            out = self.color_to_tuple(self.color)
-            self.return_callback(out)
-        self.hide()
 
     def _update_color(self) -> None:
         # update cp_color
         self.color.r = self.rs.value
         self.color.g = self.gs.value
         self.color.b = self.bs.value
+
+    def _apply_changes(self) -> None:
+        if self.return_callback:
+            out = self.color_to_tuple(self.color)
+            self.return_callback(out)
+        self.hide()

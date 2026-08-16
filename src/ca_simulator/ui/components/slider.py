@@ -31,16 +31,31 @@ class Slider:
         )
         target.blit(self.surf, self.rect)
 
-    def handle_event(self, event: pygame.event.Event, lx: int, ly: int) -> None:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.handle_rect.collidepoint(lx, ly):
+    def handle_event(self, event: pygame.event.Event) -> None:
+        if event.type not in (
+            pygame.MOUSEBUTTONDOWN,
+            pygame.MOUSEBUTTONUP,
+            pygame.MOUSEMOTION,
+        ):
+            return
+        mx, my = event.pos
+
+        # convert global -> local inside slider surface
+        lx = mx - self.rect.x
+        ly = my - self.rect.y
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.handle_rect.collidepoint(lx, ly) or self.bar_rect.collidepoint(
+                lx, ly
+            ):
                 self.dragging = True
+                self._set_value_from_local_x(lx)
 
         elif event.type == pygame.MOUSEBUTTONUP:
             self.dragging = False
 
         elif event.type == pygame.MOUSEMOTION and self.dragging:
-            self._set_value_from_mouse(lx)
+            self._set_value_from_local_x(lx)
 
     # ------------------------------------------------------
     # private helpers
@@ -51,7 +66,7 @@ class Slider:
         self.handle_rect.centerx = self.bar_rect.left + t * self.bar_rect.width
         self.handle_rect.centery = self.bar_rect.centery
 
-    def _set_value_from_mouse(self, lx: int):
+    def _set_value_from_local_x(self, lx: int):
         x = max(self.bar_rect.left, min(lx, self.bar_rect.right))
         t = (x - self.bar_rect.left) / self.bar_rect.width
         self.value = int(self.min_val + t * (self.max_val - self.min_val))

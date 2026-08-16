@@ -7,9 +7,8 @@ from .button import TextButton
 
 
 class TextButtonRow:
-    def __init__(self, x: int, y: int, label: str):
+    def __init__(self, x: int, label: str):
         self.x = x
-        self.y = y
         self.label = label
         self.buttons: list[TextButton] = []
         self.font = pygame.font.SysFont(**DEFAULT_FONT)
@@ -22,17 +21,17 @@ class TextButtonRow:
         btn = TextButton(0, 0, width, height, text, self.font, callback, active)
         self.buttons.append(btn)
 
-    def draw(self, panel: pygame.Surface):
+    def draw(self, panel: pygame.Surface, y: int):
         # label
         label_surf = self.font.render(self.label, True, TEXT_ACTIVE)
-        panel.blit(label_surf, (20, self.y))
+        panel.blit(label_surf, (self.x, y))
 
         # draw buttons horizontally
         x = self.x + self.label_offset
         for btn in self.buttons:
             # set pos in panel
             btn.rect.x = x
-            btn.rect.y = self.y
+            btn.rect.y = y
 
             # center text in button
             btn.text_x = btn.rect.x + (btn.rect.w - btn.text_surf.get_width()) // 2
@@ -65,10 +64,9 @@ class SettingsColumn:
         self.padding = padding
         self.row_height = row_height
         self.rows: list[TextButtonRow] = []
-        self.y = padding
 
     def add_row(self, label: str, values, setter, is_active):
-        row = TextButtonRow(self.padding, self.y, label)
+        row = TextButtonRow(self.padding, label)
 
         for v in values:
             active = is_active(v)
@@ -76,11 +74,12 @@ class SettingsColumn:
             row.add(text, lambda v=v: setter(v), active)
 
         self.rows.append(row)
-        self.y += self.row_height
 
-    def draw(self, panel):
+    def draw(self, surface, offset_y=0):
+        y = offset_y
         for row in self.rows:
-            row.draw(panel)
+            row.draw(surface, y)
+            y += self.row_height
 
     def handle_mouse_move(self, pos):
         for row in self.rows:
