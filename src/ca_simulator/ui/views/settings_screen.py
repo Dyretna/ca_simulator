@@ -156,7 +156,7 @@ class SettingsScreen:
             "Info Overlay",
             [True, False],
             lambda v: self.actions.set_info(v),
-            lambda v: self.config.general.show_info == v,
+            lambda v: self.actions.info_is_active() == v,
         )
 
     def _apply_changes(self):

@@ -148,7 +148,7 @@ class UIBar:
             "icon_i.png",
             start,
             self.actions.toggle_info,
-            active=lambda: self.config.general.show_info,
+            active=lambda: self.actions.info_is_active(),
         )
 
         start += 60

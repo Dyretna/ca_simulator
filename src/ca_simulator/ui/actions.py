@@ -50,9 +50,6 @@ class Actions:
     def set_autorun(self, ar):
         self.config.general.auto_run = ar
 
-    def set_info(self, inf):
-        self.config.general.show_info = inf
-
     @property
     def save_flag(self):
         return self.runner.save_flag
@@ -67,10 +64,6 @@ class Actions:
 
     def toggle_fullscreen(self) -> None:
         self.runner.toggle_fullscreen()
-
-    def toggle_info(self) -> None:
-        """Toggle information overlay."""
-        self.config.general.show_info = not self.config.general.show_info
 
     def toggle_random_mode(self) -> None:
         self.config.engine.random_gen = not self.config.engine.random_gen
@@ -92,8 +85,8 @@ class Actions:
         self.runner.update_settings()
         print("Display or Engine Updated")
 
-    def settings_is_active(self):
-        return self.runner.settings_is_active()
+    def settings_is_active(self) -> bool:
+        return self.runner.settings_screen.is_active()
 
     def open_settings(self) -> None:
         """Show the settings screen as a modal view."""
@@ -121,3 +114,18 @@ class Actions:
             input_color=self.config.colors.ca_bg_color,
             callback=self.set_bg_color,
         )
+
+    # --- Information Overlay ---
+
+    def set_info(self, value: bool) -> None:
+        self.runner.info_overlay.active = value
+
+    def toggle_info(self) -> None:
+        """Toggle information overlay."""
+        if self.runner.info_overlay.is_active():
+            self.runner.info_overlay.hide()
+        else:
+            self.runner.info_overlay.show()
+
+    def info_is_active(self) -> bool:
+        return self.runner.info_overlay.is_active()

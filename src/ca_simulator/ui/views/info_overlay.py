@@ -9,6 +9,18 @@ class InformationOverlay:
 
     def __init__(self, config: Config):
         self.config = config
+        self.active = False
+
+    def show(self):
+        """Activate settings screen."""
+        self.active = True
+
+    def hide(self):
+        """Deactivate settings screen."""
+        self.active = False
+
+    def is_active(self):
+        return self.active
 
     def draw(self, surface: pygame.Surface, ruleset_code: int) -> None:
         font = pygame.font.SysFont(**DEFAULT_FONT)

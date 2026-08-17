@@ -139,8 +139,8 @@ class CASimulator:
                 case RunState.RUNNING:
                     # SIMULATION runs unless settings or colorpicker is open
                     if (
-                        not self.settings_is_active()
-                        and not self.colorpicker_is_active()
+                        not self.settings_screen.is_active()
+                        and not self.colorpicker.is_active()
                     ):
                         # normal step
                         cells = self.engine.step()
@@ -201,14 +201,6 @@ class CASimulator:
             self._initialize_pygame()
         self.ui_bar.rebuild()
         self._set_state(RunState.RESET)
-
-    def settings_is_active(self):
-        return self.settings_screen.is_active()
-
-    # --- ColorPicker ---
-
-    def colorpicker_is_active(self):
-        return self.colorpicker.is_active()
 
     # toggle fullscreen
     def toggle_fullscreen(self) -> None:
@@ -274,7 +266,7 @@ class CASimulator:
 
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
-        if self.config.general.show_info:
+        if self.info_overlay.is_active():
             self.info_overlay.draw(self.screen, self.ruleset_code)
         if self.settings_screen.is_active():
             self.settings_screen.draw(self.screen)
