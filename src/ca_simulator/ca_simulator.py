@@ -8,8 +8,8 @@ import pygame
 from .config import Config
 from .core.ca_engine import CAEngine
 from .ui.actions import Actions
-from .ui.theme import DEFAULT_FONT
 from .ui.views.colorpicker import ColorPicker
+from .ui.views.info_overlay import InformationOverlay
 from .ui.views.settings_screen import SettingsScreen
 from .ui.views.ui_bar import UIBar
 
@@ -56,6 +56,8 @@ class CASimulator:
         Modal settings view for adjusting engine and display parameters.
     colorpicker : ColorPicker
         Modal color selection view for foreground/background CA colors.
+    info_overlay : InformationOverlay
+        Information overlay on running simulation.
     save_flag : bool
         Indicates whether the next completed simulation should be saved.
     display_changes : bool
@@ -107,6 +109,7 @@ class CASimulator:
         self.settings_screen = SettingsScreen(self.config, self.actions)
         self.ui_bar = UIBar(self.config, self.actions)
         self.colorpicker = ColorPicker()
+        self.info_overlay = InformationOverlay(self.config)
 
         self.save_flag = False
         self.display_changes = False
@@ -272,32 +275,12 @@ class CASimulator:
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
         if self.config.general.show_info:
-            self._draw_info()
+            self.info_overlay.draw(self.screen, self.ruleset_code)
         if self.settings_screen.is_active():
             self.settings_screen.draw(self.screen)
         if self.colorpicker.is_active():
             self.colorpicker.draw(self.screen)
         pygame.display.flip()
-
-    def _draw_info(self) -> None:
-        """Draw the info overlay on top of the CA surface."""
-
-        font = pygame.font.SysFont(**DEFAULT_FONT)
-
-        bit_str = f"{self.ruleset_code:0{self.engine.ruleset.bit_size}b}"
-        grouped = " ".join(bit_str[i : i + 8] for i in range(0, len(bit_str), 8))
-        text_str = f"Rule: {self.engine.ruleset_code} ({grouped})"
-        text = font.render(text_str, True, (255, 255, 255))
-
-        text_w, text_h = font.size(text_str)
-        padding = 10
-        box_w = text_w + padding * 2
-        box_h = text_h + padding
-
-        box = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
-        box.fill((0, 0, 0, 120))
-        self.screen.blit(box, (0, 0))
-        self.screen.blit(text, (padding, padding // 2))
 
     # --------------------------------------------------------
     # Initialize, Reset, Save
