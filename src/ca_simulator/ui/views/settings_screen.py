@@ -10,6 +10,17 @@ from ..components import SettingsColumn, UIPanel
 
 
 class SettingsScreen:
+    """
+    Modal view for editing simulator settings.
+
+    SettingsScreen displays a centered panel containing labelled setting
+    rows and Apply/Cancel controls. It manages its own active state,
+    builds a SettingsColumn on show(), and routes mouse and keyboard
+    events to the appropriate components. The screen draws a dimmed
+    overlay behind the panel and is responsible for closing itself via
+    hide() when the user cancels or applies changes.
+    """
+
     def __init__(self, config: Config, actions: Actions):
         self.config = config
         self.actions = actions

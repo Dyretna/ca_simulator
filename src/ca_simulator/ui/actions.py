@@ -8,6 +8,22 @@ ColorTuple = Tuple[int, int, int, int]
 
 
 class Actions:
+    """
+    Actions is the interface layer between the UI and CASimulator.
+
+    All setters and toggles update the Config directly. When display or engine
+    settings change, the View is responsible for calling update_settings().
+
+    The UI bar uses open_fg_picker(), open_bg_picker() and open_settings() to
+    open the respective modal views. Since only one Colorpicker instance exists,
+    the UI must provide callbacks to indicate whether FG or BG color is being
+    changed.
+
+    Views are responsible for closing themselves via hide().
+
+    The save_flag is delegated to CASimulator; Actions only forwards the toggle.
+    """
+
     def __init__(self, runner: "CASimulator"):
         self.runner = runner
         self.config = runner.config

@@ -2,6 +2,16 @@ import pygame
 
 
 class Slider:
+    """
+    A simple horizontal value slider.
+
+    The slider renders a bar and a draggable handle, and updates its value
+    based on mouse interaction. It converts global mouse coordinates into
+    local slider space, tracks dragging state, and ensures the handle stays
+    within the bar. The public API consists of draw() and handle_event(),
+    allowing views to integrate the slider as a lightweight UI control.
+    """
+
     def __init__(self, min_val: int, max_val: int, length: int):
         self.min_val = min_val
         self.max_val = max_val

@@ -1,24 +1,4 @@
-# src/pygame_automata/ca_simulator.py
-
-"""
-Pygame-based runner for interactive 1D cellular automata simulations.
-
-This module manages the real-time execution loop, rendering, and UI
-controls for CAEngine. It provides a continuous simulation flow where
-each generation is drawn immediately as it is produced. When the
-automaton reaches the bottom of the screen, the runner enters a
-post-simulation phase that allows saving, pausing, or restarting the
-simulation without interrupting an active run.
-
-The runner also supports a settings overlay (SettingsScreen)
-that allows the user to modify core configuration parameters such as
-resolution, bit-size, cell size, and update mode. When the settings
-screen is active, the normal simulation loop is suspended visually and
-all input events are routed to the settings UI. Once the user confirms
-changes, the runner rebuilds its CAEngine and Pygame surfaces via
-update_settings(), ensuring that the new configuration takes effect
-before resuming normal execution.
-"""
+# src/ca_simulator/ca_simulator.py
 
 import os
 from enum import Enum, auto
@@ -43,6 +23,56 @@ class RunState(Enum):
 
 
 class CASimulator:
+    """
+    Main controller for the Cellular Automata application.
+
+    CASimulator owns the core engine, configuration, UI components and the
+    main execution loop. It initializes Pygame, manages global state
+    transitions, routes events to active views, and coordinates rendering
+    of both the CA surface and all UI overlays.
+
+    Parameters
+    ----------
+    None
+        CASimulator resolves configuration internally and initializes all
+        components on construction.
+
+    Attributes
+    ----------
+    config : Config
+        Global configuration object containing display, engine and general
+        settings.
+    state : RunState
+        Current simulator state (INITIALIZATION, RUNNING, IDLE, RESET, QUIT).
+    engine : CAEngine
+        The cellular automaton engine responsible for rule evaluation and
+        generation updates.
+    actions : Actions
+        Interface layer used by UI components to modify configuration and
+        trigger simulator operations.
+    ui_bar : UIBar
+        The main UI bar shown during simulation.
+    settings_screen : SettingsScreen
+        Modal settings view for adjusting engine and display parameters.
+    colorpicker : ColorPicker
+        Modal color selection view for foreground/background CA colors.
+    save_flag : bool
+        Indicates whether the next completed simulation should be saved.
+    display_changes : bool
+        Tracks whether display settings require reinitializing Pygame.
+
+    Notes
+    -----
+    CASimulator acts as the central coordinator. The main loop handles:
+    event routing, simulation stepping, idle/reset transitions, and drawing
+    of all active UI layers. Modal views (settings and colorpicker) are
+    responsible for closing themselves, while CASimulator ensures they are
+    drawn and receive events when active.
+
+    The simulator rebuilds engine and surfaces when settings change, and
+    can save the current CA surface as an image when requested.
+    """
+
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Cellular Automata")
@@ -138,7 +168,7 @@ class CASimulator:
                     return
 
             # always draw UI and tick
-            self._draw_ui_frame()
+            self._draw()
             self.clock.tick(self.fps)
 
     # ------------------------------------------------------------------
@@ -189,12 +219,8 @@ class CASimulator:
     # ------------------------------------------------------------------
 
     def _handle_event(self, event: pygame.event.Event) -> None:
-        """
-        Handle a single pygame event.
+        """Handle event by routing to an active modal view or UIbar."""
 
-        Route to active modal view. If no view is active, route to UIbar.
-        Global events (QUIT, keyboard shortcuts) are handled directly.
-        """
         if event.type == pygame.QUIT:
             self.quit()
             return
@@ -240,7 +266,9 @@ class CASimulator:
                 (x, y, self.engine.cell_size, self.engine.cell_size),
             )
 
-    def _draw_ui_frame(self):
+    def _draw(self):
+        """Blits the simulation, draws UIbar and eventually other overlays and screens."""
+
         self.screen.blit(self.ca_surface, (0, 0))
         self.ui_bar.draw(self.screen)
         if self.config.general.show_info:

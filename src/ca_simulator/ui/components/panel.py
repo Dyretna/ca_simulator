@@ -7,6 +7,16 @@ from .settings_components import TextButton
 
 
 class UIPanel:
+    """
+    A simple base panel used by modal views.
+
+    UIPanel provides a centered surface with consistent styling, padding
+    and geometry. Views can choose their own size via width_ratio and
+    height_ratio, but share the same visual layout. The panel also offers
+    a helper for placing Apply and Cancel buttons in a uniform bottom
+    position.
+    """
+
     def __init__(
         self, width_ratio: float = 0.6, height_ratio: float = 0.6, padding: int = 60
     ):

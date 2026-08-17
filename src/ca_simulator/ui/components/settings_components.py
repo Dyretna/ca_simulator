@@ -1,3 +1,13 @@
+"""
+Components used by the Settings view.
+
+TextButtonRow and SettingsColumn provide simple UI structures for
+labelled button rows and vertical settings layouts. They are kept
+inside settings_components to show which view uses them. If needed,
+they can be made more abstract later, but for now the design is kept
+minimal and straightforward.
+"""
+
 from typing import Callable
 
 import pygame
@@ -7,6 +17,15 @@ from .button import TextButton
 
 
 class TextButtonRow:
+    """
+    A horizontal row of text buttons with a label.
+
+    The row manages button creation, layout and interaction. Each button
+    is positioned relative to the row's x-coordinate and rendered on the
+    given y-position during draw(). The row handles hover and click
+    events and ensures only one button is active at a time.
+    """
+
     def __init__(self, x: int, label: str):
         self.x = x
         self.label = label
@@ -60,6 +79,15 @@ class TextButtonRow:
 
 
 class SettingsColumn:
+    """
+    A vertical collection of TextButtonRow instances.
+
+    Each added row represents a labelled setting with selectable values.
+    SettingsColumn handles layout, drawing and input dispatching for all
+    rows. Views using this component are responsible for calling draw()
+    and forwarding mouse events.
+    """
+
     def __init__(self, padding: int, row_height: int):
         self.padding = padding
         self.row_height = row_height

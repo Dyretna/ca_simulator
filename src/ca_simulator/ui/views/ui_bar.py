@@ -1,4 +1,4 @@
-# src/pygame_automata/ui/pygame_ui/views/ui_bar.py
+# src/ca_simulator/ui/views/ui_bar.py
 
 import pygame
 
@@ -9,6 +9,18 @@ from ..theme import UI_BAR_ALPHA, UI_BAR_BG
 
 
 class UIBar:
+    """
+    Bottom UI bar for global simulator controls.
+
+    UIBar renders a fixed-height bar at the bottom of the screen and
+    provides quick-access buttons for core simulator actions such as
+    play, stop, fullscreen, info overlay, autorun, random mode, saving
+    and opening modal views. It manages its own surface, rebuilds when
+    display settings change, and routes mouse and keyboard events to
+    the appropriate buttons. The bar converts global coordinates to its
+    local space and ensures each button is drawn and updated correctly.
+    """
+
     def __init__(self, config: Config, actions: Actions):
         self.config = config
         self.actions = actions

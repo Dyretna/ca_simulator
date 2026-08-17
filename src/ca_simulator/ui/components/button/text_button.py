@@ -62,9 +62,9 @@ class TextButton(ButtonBase):
         pygame.draw.rect(surface, btn_color, rect, border_radius=6)
         surface.blit(self.text_surf, (self.text_x, self.text_y))
 
-    def on_mouse_move(self, local_pos):
-        self.hover = self.rect.collidepoint(local_pos)
+    def on_mouse_move(self, pos):
+        self.hover = self.rect.collidepoint(pos)
 
-    def on_mouse_down(self, local_pos):
-        if self.rect.collidepoint(local_pos):
+    def on_mouse_down(self, pos):
+        if self.rect.collidepoint(pos):
             self.callback()

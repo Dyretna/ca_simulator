@@ -9,6 +9,25 @@ ColorTuple = Tuple[int, int, int, int]
 
 
 class ColorPicker:
+    """
+    Modal view for selecting a foreground or background color.
+
+    ColorPicker displays a panel with RGB sliders, a live color preview,
+    and Apply/Cancel controls. It manages its own active state, updates
+    slider positions when shown, and returns the selected color through
+    a callback supplied by the caller. The picker draws a dimmed overlay
+    behind the panel and is responsible for closing itself via hide().
+
+    Notes
+    -----
+    Colors are converted between (r, g, b, a) tuples and pygame.Color.
+    The simulator stores colors as tuples to avoid accidental shared
+    references: pygame.Color is mutable, and using it throughout the
+    configuration layer risks old color objects lingering in memory or
+    being mutated indirectly. Using tuples for config and pygame.Color
+    only inside the UI keeps updates safe and predictable.
+    """
+
     def __init__(self):
         self.active: bool = False
 
