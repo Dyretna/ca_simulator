@@ -11,50 +11,28 @@ class Actions:
     """
     Actions is the interface layer between the UI and CASimulator.
 
-    All setters and toggles update the Config directly. When display or engine
-    settings change, the View is responsible for calling update_settings().
+    Only immediate UI-driven actions live here:
+    - toggles (fullscreen, autorun, random mode, info overlay)
+    - opening modal views (settings, colorpicker)
+    - play/quit commands
+    - update_settings() after Settings commits buffered config
 
-    The UI bar uses open_fg_picker(), open_bg_picker() and open_settings() to
-    open the respective modal views. Since only one Colorpicker instance exists,
-    the UI must provide callbacks to indicate whether FG or BG color is being
-    changed.
-
-    Views are responsible for closing themselves via hide().
-
-    The save_flag is delegated to CASimulator; Actions only forwards the toggle.
+    SettingsScreen no longer calls setters here; it writes to its own
+    local_state buffer and commits via state_to_config().
     """
 
     def __init__(self, runner: "CASimulator"):
         self.runner = runner
         self.config = runner.config
 
-    # --- Setters ---
-    def set_resolution(self, w, h):
-        self.runner.display_changes = True
-        self.config.display.width = w
-        self.config.display.height = h
-
-    def set_fullscreen(self, fs):
-        self.runner.display_changes = True
-        self.config.display.fullscreen = fs
-
-    def set_ruleset(self, b):
-        self.config.engine.bit_size = b
-
-    def set_cellsize(self, cs):
-        self.config.engine.cell_size = cs
-
-    def set_random_mode(self, m):
-        self.config.engine.random_gen = m
-
-    def set_autorun(self, ar):
-        self.config.general.auto_run = ar
+    # ---------------------------------------------------------
+    # General actions in use by UIBar
+    # ---------------------------------------------------------
 
     @property
     def save_flag(self):
         return self.runner.save_flag
 
-    # --- Toggles ---
     def toggle_save(self) -> None:
         "Save when CA simulation is done"
         self.runner.save_flag = not self.runner.save_flag
@@ -69,8 +47,6 @@ class Actions:
         self.config.engine.random_gen = not self.config.engine.random_gen
         self.update_settings()
 
-    # --- play and stop ---
-
     def play(self):
         """Plays next or resets the simulation"""
         self.runner.play()
@@ -83,7 +59,7 @@ class Actions:
 
     def update_settings(self):
         self.runner.update_settings()
-        print("Display or Engine Updated")
+        print("Settings Updated")
 
     def settings_is_active(self) -> bool:
         return self.runner.settings_screen.is_active()
@@ -116,9 +92,6 @@ class Actions:
         )
 
     # --- Information Overlay ---
-
-    def set_info(self, value: bool) -> None:
-        self.runner.info_overlay.active = value
 
     def toggle_info(self) -> None:
         """Toggle information overlay."""

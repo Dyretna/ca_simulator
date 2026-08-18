@@ -210,7 +210,7 @@ class CASimulator:
         pygame.display.set_mode(res, flags)
 
     # ------------------------------------------------------------------
-    # FLow Control
+    # Events - routing...
     # ------------------------------------------------------------------
 
     def _handle_event(self, event: pygame.event.Event) -> None:
@@ -230,10 +230,6 @@ class CASimulator:
         else:
             self.ui_bar.handle_event(event)
             return
-
-    def _set_state(self, state: RunState):
-        print(f"Transitioning from {self.state.name} to {state.name}..")
-        self.state = state
 
     # ------------------------------------------------------------------
     # Render
@@ -275,8 +271,12 @@ class CASimulator:
         pygame.display.flip()
 
     # --------------------------------------------------------
-    # Initialize, Reset, Save
+    # Initialize, Reset, Set RunState
     # --------------------------------------------------------
+
+    def _set_state(self, state: RunState):
+        print(f"Transitioning from {self.state.name} to {state.name}..")
+        self.state = state
 
     def _initialize_pygame(self) -> None:
         # recreate display
@@ -298,6 +298,10 @@ class CASimulator:
         self.ruleset_code = new_rule
         self.ca_surface.fill(self.config.colors.ca_bg_color)
         print(f"Current Rule: {new_rule}")
+
+    # --------------------------------------------------------
+    # Save
+    # --------------------------------------------------------
 
     def _save(self) -> None:
         """Save the current CA surface as an image."""

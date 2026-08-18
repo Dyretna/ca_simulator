@@ -12,11 +12,11 @@ class InformationOverlay:
         self.active = False
 
     def show(self):
-        """Activate settings screen."""
+        """Activate overlay."""
         self.active = True
 
     def hide(self):
-        """Deactivate settings screen."""
+        """Deactivate overlay."""
         self.active = False
 
     def is_active(self):

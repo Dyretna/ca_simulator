@@ -1,24 +1,35 @@
 # src/pygame_automata/ui/pygame_ui/views/settings_screen.py
+from dataclasses import dataclass
 from typing import Optional
 
 import pygame
 
-from ...config import Config
+from ...config import Config, DisplaySettings, EngineSettings, GeneralSettings
 from ...ui.theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
 from ..actions import Actions
 from ..components import SettingsColumn, UIPanel
 
 
+@dataclass
+class SettingsState:
+    display: DisplaySettings
+    general: GeneralSettings
+    engine: EngineSettings
+
+
 class SettingsScreen:
     """
-    Modal view for editing simulator settings.
+    Modal view for editing simulator configuration.
 
-    SettingsScreen displays a centered panel containing labelled setting
-    rows and Apply/Cancel controls. It manages its own active state,
-    builds a SettingsColumn on show(), and routes mouse and keyboard
-    events to the appropriate components. The screen draws a dimmed
-    overlay behind the panel and is responsible for closing itself via
-    hide() when the user cancels or applies changes.
+    SettingsScreen presents a centered panel with labelled setting rows and
+    Apply/Cancel controls. When opened, it creates a local SettingsState
+    snapshot from the global Config. User interactions modify this local
+    state only; no changes are applied to the simulator until Apply is
+    pressed. Cancel discards the local state and closes the view.
+
+    The screen manages its own active flag, builds a SettingsColumn on
+    show(), and routes mouse/keyboard events to its components. A dimmed
+    overlay is drawn behind the panel while active.
     """
 
     def __init__(self, config: Config, actions: Actions):
@@ -35,12 +46,16 @@ class SettingsScreen:
         self.panel.place_bottom_buttons(self.font, self._apply_changes, self.hide)
         self.column: Optional[SettingsColumn] = None
 
+        # local state updates when opening
+        self.local_state: Optional[SettingsState] = None
+
     # ------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------
     def show(self):
         """Activate settings screen."""
         self.active = True
+        self.local_state = self._state_from_config()
         self.column = SettingsColumn(padding=self.panel.padding, row_height=40)
         self._build_column()
 
@@ -112,53 +127,90 @@ class SettingsScreen:
         self.column.add_row(
             "Resolution",
             [(1280, 720), (1920, 1080)],
-            lambda v: self.actions.set_resolution(*v),
-            lambda v: v[0] == self.config.display.width
-            and v[1] == self.config.display.height,
+            lambda v: self._set_local("display", "width", v[0])
+            or self._set_local("display", "height", v[1]),
+            lambda v: (
+                self.local_state.display.width == v[0]
+                and self.local_state.display.height == v[1]
+            ),
         )
 
         self.column.add_row(
             "Fullscreen",
             [True, False],
-            lambda v: self.actions.set_fullscreen(v),
-            lambda v: self.config.display.fullscreen == v,
+            lambda v: self._set_local("display", "fullscreen", v),
+            lambda v: self.local_state.display.fullscreen == v,
         )
 
         self.column.add_row(
             "Ruleset Size",
             [8, 16, 32, 64],
-            lambda v: self.actions.set_ruleset(v),
-            lambda v: self.config.engine.bit_size == v,
+            lambda v: self._set_local("engine", "bit_size", v),
+            lambda v: self.local_state.engine.bit_size == v,
         )
 
         self.column.add_row(
             "Cell Size",
             list(range(1, 11)),
-            lambda v: self.actions.set_cellsize(v),
-            lambda v: self.config.engine.cell_size == v,
+            lambda v: self._set_local("engine", "cell_size", v),
+            lambda v: self.local_state.engine.cell_size == v,
         )
 
         self.column.add_row(
             "Random Mode",
             [True, False],
-            lambda v: self.actions.set_random_mode(v),
-            lambda v: self.config.engine.random_gen == v,
+            lambda v: self._set_local("engine", "random_gen", v),
+            lambda v: self.local_state.engine.random_gen == v,
         )
 
         self.column.add_row(
             "AutoRun",
             [True, False],
-            lambda v: self.actions.set_autorun(v),
-            lambda v: self.config.general.auto_run == v,
+            lambda v: self._set_local("general", "auto_run", v),
+            lambda v: self.local_state.general.auto_run == v,
         )
 
-        self.column.add_row(
-            "Info Overlay",
-            [True, False],
-            lambda v: self.actions.set_info(v),
-            lambda v: self.actions.info_is_active() == v,
+    # -----------------------------------------------------------------
+    # Set State and Apply
+    # -----------------------------------------------------------------
+
+    def _state_from_config(self):
+        return SettingsState(
+            display=DisplaySettings(
+                width=self.config.display.width,
+                height=self.config.display.height,
+                fullscreen=self.config.display.fullscreen,
+            ),
+            general=GeneralSettings(
+                auto_run=self.config.general.auto_run,
+                idle_pause_ms=self.config.general.idle_pause_ms,
+            ),
+            engine=EngineSettings(
+                bit_size=self.config.engine.bit_size,
+                cell_size=self.config.engine.cell_size,
+                random_gen=self.config.engine.random_gen,
+            ),
         )
+
+    def state_to_config(self):
+        # display
+        self.config.display.width = self.local_state.display.width
+        self.config.display.height = self.local_state.display.height
+        self.config.display.fullscreen = self.local_state.display.fullscreen
+
+        # general
+        self.config.general.auto_run = self.local_state.general.auto_run
+        self.config.general.idle_pause_ms = self.local_state.general.idle_pause_ms
+
+        # engine
+        self.config.engine.bit_size = self.local_state.engine.bit_size
+        self.config.engine.cell_size = self.local_state.engine.cell_size
+        self.config.engine.random_gen = self.local_state.engine.random_gen
+
+    def _set_local(self, section: str, key: str, value):
+        setattr(getattr(self.local_state, section), key, value)
 
     def _apply_changes(self):
+        self.state_to_config()
         self.actions.update_settings()
         self.hide()
