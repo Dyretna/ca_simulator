@@ -8,9 +8,9 @@ import pygame
 from .config import Config
 from .core.ca_engine import CAEngine
 from .ui.actions import Actions
-from .ui.views.colorpicker import ColorPicker
 from .ui.views.info_overlay import InformationOverlay
-from .ui.views.settings_screen import SettingsScreen
+from .ui.views.modal_views.colorpicker import ColorPicker
+from .ui.views.modal_views.settings_screen import SettingsScreen
 from .ui.views.ui_bar import UIBar
 
 

@@ -4,10 +4,11 @@ from typing import Optional
 
 import pygame
 
-from ...config import Config, DisplaySettings, EngineSettings, GeneralSettings
-from ...ui.theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
-from ..actions import Actions
-from ..components import SettingsColumn, UIPanel
+from ....config import Config, DisplaySettings, EngineSettings, GeneralSettings
+from ...actions import Actions
+from ...components import SettingsColumn, UIPanel
+from ...theme import DEFAULT_FONT, SETTINGS_PANEL_BG, SETTINGS_TITLE_C, TITLE_FONT
+from .base import ModalView
 
 
 @dataclass
@@ -17,7 +18,7 @@ class SettingsState:
     engine: EngineSettings
 
 
-class SettingsScreen:
+class SettingsScreen(ModalView):
     """
     Modal view for editing simulator configuration.
 
@@ -52,56 +53,21 @@ class SettingsScreen:
     # ------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------
-    def show(self):
-        """Activate settings screen."""
-        self.active = True
+
+    # show() in baseclass activates _on _show()
+    def _on_show(self, **kwargs):
         self.local_state = self._state_from_config()
         self.column = SettingsColumn(padding=self.panel.padding, row_height=40)
         self._build_column()
-
-    def hide(self):
-        """Deactivate settings screen."""
-        self.active = False
-
-    def is_active(self):
-        return self.active
-
-    def handle_event(self, event: pygame.event.Event):
-        if not self.active:
-            return
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            self.hide()
-            return
-
-        if event.type == pygame.MOUSEMOTION:
-            # translate positions from global to local
-            local_pos = (event.pos[0] - self.panel.x, event.pos[1] - self.panel.y)
-            self.column.handle_mouse_move(local_pos)
-            self.panel.apply_button.on_mouse_move(event.pos)
-            self.panel.cancel_button.on_mouse_move(event.pos)
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # translate positions from global to local
-            local_pos = (event.pos[0] - self.panel.x, event.pos[1] - self.panel.y)
-            self.column.handle_mouse_down(local_pos)
-            self.panel.apply_button.on_mouse_down(event.pos)
-            self.panel.cancel_button.on_mouse_down(event.pos)
 
     def draw(self, surface: pygame.Surface):
         if not self.active:
             return
 
-        # dark overlay - dim background
-        w, h = surface.get_size()
-        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 160))
-        surface.blit(overlay, (0, 0))
+        self.draw_overlay(surface)
 
-        # clear panel
+        # Prepare panel background with title on the panel.surface
         self.panel.surface.fill(SETTINGS_PANEL_BG)
-
-        # Draw title and Options
         title = self.title_font.render("Settings", True, SETTINGS_TITLE_C)
 
         p = self.panel.padding
@@ -109,14 +75,30 @@ class SettingsScreen:
         column_offset_y = p + title_height + 20
 
         self.panel.surface.blit(title, (p, p))
-        self.column.draw(self.panel.surface, column_offset_y)
 
-        # blit panel
+        # blit panel BG with title to main surface
         surface.blit(self.panel.surface, (self.panel.x, self.panel.y))
+
+        # compute global column origin and draw column using global coords
+        global_column_y = self.panel.y + column_offset_y
+        global_column_x = self.panel.x + self.panel.padding
+
+        # pass both global X and Y to the column
+        self.column.draw(surface, global_column_y, start_x=global_column_x)
 
         # draw bottom buttons
         self.panel.apply_button.draw(surface)
         self.panel.cancel_button.draw(surface)
+
+    # ------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------
+
+    def _handle_components(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEMOTION:
+            self.column.handle_mouse_move(event.pos)
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.column.handle_mouse_down(event.pos)
 
     # ------------------------------------------------------------
     # Build helpers

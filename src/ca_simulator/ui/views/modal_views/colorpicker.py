@@ -2,13 +2,14 @@ from typing import Callable, Tuple
 
 import pygame
 
-from ..components import Slider, UIPanel
-from ..theme import DEFAULT_FONT, SETTINGS_PANEL_BG, TITLE_FONT
+from ...components import Slider, UIPanel
+from ...theme import DEFAULT_FONT, SETTINGS_PANEL_BG, TITLE_FONT
+from .base import ModalView
 
 ColorTuple = Tuple[int, int, int, int]
 
 
-class ColorPicker:
+class ColorPicker(ModalView):
     """
     Modal view for selecting a foreground or background color.
 
@@ -60,9 +61,10 @@ class ColorPicker:
     def color_to_tuple(self, c: pygame.Color) -> ColorTuple:
         return (c.r, c.g, c.b, c.a)
 
-    def show(self, input_color: ColorTuple, callback: Callable):
+    # show() in baseclass activates _on _show()
+    def _on_show(self, input_color: ColorTuple, callback: Callable):
         """Activate colorpicker screen."""
-        self.active = True
+
         self.return_callback = callback
 
         self.panel.place_bottom_buttons(self.font, self._apply_changes, self.hide)
@@ -85,49 +87,11 @@ class ColorPicker:
         self._build_sliders()
         self._build_color_rect()
 
-    def hide(self):
-        """Deactivate colorpicker screen."""
-        self.active = False
-
-    def is_active(self):
-        return self.active
-
-    def handle_event(self, event: pygame.event.Event):
-        if not self.active:
-            return
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            self.hide()
-            return
-
-        if event.type not in (
-            pygame.MOUSEBUTTONDOWN,
-            pygame.MOUSEBUTTONUP,
-            pygame.MOUSEMOTION,
-        ):
-            return
-
-        for slider in self.sliders:
-            slider.handle_event(event)
-
-        if event.type == pygame.MOUSEMOTION:
-            self.panel.apply_button.on_mouse_move(event.pos)
-            self.panel.cancel_button.on_mouse_move(event.pos)
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.panel.apply_button.on_mouse_down(event.pos)
-            self.panel.cancel_button.on_mouse_down(event.pos)
-
     def draw(self, surface: pygame.Surface) -> None:
         if not self.active:
             return
 
-        # dark overlay - dim background
-        w, h = surface.get_size()
-        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 160))
-        surface.blit(overlay, (0, 0))
-
+        self.draw_overlay(surface)
         self.panel.surface.fill(SETTINGS_PANEL_BG)
 
         # color preview
@@ -148,7 +112,15 @@ class ColorPicker:
         self.panel.cancel_button.draw(surface)
 
     # --------------------------------------------------------------
-    # helpers
+    # Events
+    # --------------------------------------------------------------
+
+    def _handle_components(self, event):
+        for slider in self.sliders:
+            slider.handle_event(event)
+
+    # --------------------------------------------------------------
+    # Build helpers
     # --------------------------------------------------------------
 
     def _build_sliders(self):
@@ -165,6 +137,10 @@ class ColorPicker:
         left = panel_rect.width - (width + p)
         top = p
         self.color_rect.update(left, top, width, width)
+
+    # --------------------------------------------------------------
+    # Update and Apply
+    # --------------------------------------------------------------
 
     def _update_color(self) -> None:
         # update cp_color

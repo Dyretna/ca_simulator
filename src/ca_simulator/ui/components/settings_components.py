@@ -20,14 +20,16 @@ class TextButtonRow:
     """
     A horizontal row of text buttons with a label.
 
-    The row manages button creation, layout and interaction. Each button
-    is positioned relative to the row's x-coordinate and rendered on the
-    given y-position during draw(). The row handles hover and click
-    events and ensures only one button is active at a time.
+    This implementation expects self.x/self.y to be set to GLOBAL coordinates
+    by the caller (SettingsColumn) before draw() is anropad. draw() updates
+    each button.rect to global coords so event handling can use event.pos directly.
     """
 
-    def __init__(self, x: int, label: str):
-        self.x = x
+    def __init__(self, label: str):
+        # Do not assume global position at construction time.
+        # SettingsColumn will set row.x and row.y before draw().
+        self.x: int = 0
+        self.y: int = 0
         self.label = label
         self.buttons: list[TextButton] = []
         self.font = pygame.font.SysFont(**DEFAULT_FONT)
@@ -40,41 +42,45 @@ class TextButtonRow:
         btn = TextButton(0, 0, width, height, text, self.font, callback, active)
         self.buttons.append(btn)
 
-    def draw(self, panel: pygame.Surface, y: int):
-        # label
+    def draw(self, surface: pygame.Surface):
+        # label (self.x/self.y must be global)
         label_surf = self.font.render(self.label, True, TEXT_ACTIVE)
-        panel.blit(label_surf, (self.x, y))
+        surface.blit(label_surf, (self.x, self.y))
 
-        # draw buttons horizontally
+        # draw buttons using global coords
         x = self.x + self.label_offset
         for btn in self.buttons:
-            # set pos in panel
-            btn.rect.x = x
-            btn.rect.y = y
+            # set btn rect to global position
+            # before any collision checks
+            btn.rect.topleft = (x, self.y)
 
             # center text in button
             btn.text_x = btn.rect.x + (btn.rect.w - btn.text_surf.get_width()) // 2
             btn.text_y = btn.rect.y + (btn.rect.h - btn.text_surf.get_height()) // 2
 
-            # draw on panel
-            btn.draw(panel)
-
-            # next butt assumes position
+            # draw button
+            btn.draw(surface)
             x += btn.rect.w + 10
 
     def handle_mouse_move(self, pos):
+        # pos is global
+        # TextButton.on_mouse_move expects global pos
         for btn in self.buttons:
             btn.on_mouse_move(pos)
 
     def handle_mouse_down(self, pos):
+        # pos is global
+        # check collidepoint against global rects
         for btn in self.buttons:
             if btn.rect.collidepoint(pos):
+                # clicked: set active state
                 btn.active = True
-
                 for other in self.buttons:
                     if other is not btn:
                         other.active = False
 
+            # still call on_mouse_down so button can run
+            # callback if implemented there
             btn.on_mouse_down(pos)
 
 
@@ -94,7 +100,7 @@ class SettingsColumn:
         self.rows: list[TextButtonRow] = []
 
     def add_row(self, label: str, values, setter, is_active):
-        row = TextButtonRow(self.padding, label)
+        row = TextButtonRow(label)
 
         for v in values:
             active = is_active(v)
@@ -103,10 +109,21 @@ class SettingsColumn:
 
         self.rows.append(row)
 
-    def draw(self, surface, offset_y=0):
+    def draw(self, surface, offset_y=0, start_x=None):
+        """
+        Draw rows using global coordinates.
+
+        start_x must be provided (global X).
+        offset_y is global Y where the column starts.
+        """
+        assert start_x is not None, "SettingsColumn.draw requires start_x (global X)"
+
         y = offset_y
         for row in self.rows:
-            row.draw(surface, y)
+            # set global position for the row before drawing
+            row.x = start_x
+            row.y = y
+            row.draw(surface)
             y += self.row_height
 
     def handle_mouse_move(self, pos):
